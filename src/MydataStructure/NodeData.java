@@ -1,10 +1,10 @@
-package dataStructure;
+package MydataStructure;
 
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-import utils.Point3D;
+import MyUtils.Point3D;
 
 public class NodeData implements node_data , Serializable{
 	private int key;

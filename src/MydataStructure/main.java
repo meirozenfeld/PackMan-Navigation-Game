@@ -1,12 +1,12 @@
-package dataStructure;
+package MydataStructure;
 
 import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import algorithms.*;
-import utils.*;
+import MyAlgorithms.*;
+import MyUtils.*;
 public class main {
 
 	public static void main(String[] args) throws JSONException  {

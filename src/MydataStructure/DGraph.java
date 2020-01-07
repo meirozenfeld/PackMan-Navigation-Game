@@ -1,4 +1,4 @@
-package dataStructure;
+package MydataStructure;
 import java.util.Collection;
 import java.util.Hashtable;
 
@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import utils.Point3D;
+import MyUtils.Point3D;
 
 import java.io.Serializable;
 

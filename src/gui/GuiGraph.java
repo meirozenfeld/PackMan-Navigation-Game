@@ -15,14 +15,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import algorithms.*;
-import dataStructure.*;
-import utils.*;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import MyAlgorithms.*;
+import MyUtils.*;
+import MydataStructure.*;
 
 
 public class GuiGraph extends JFrame implements ActionListener, MouseListener, Serializable

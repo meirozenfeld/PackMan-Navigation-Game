@@ -1,4 +1,4 @@
-package algorithms;
+package MyAlgorithms;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,12 +15,12 @@ import java.util.Stack;
 
 import javax.management.RuntimeErrorException;
 
-import dataStructure.graph;
-import dataStructure.node_data;
-import dataStructure.edge_data;
-import dataStructure.NodeData;
-import dataStructure.DGraph;
-import dataStructure.EdgeData;
+import MydataStructure.DGraph;
+import MydataStructure.EdgeData;
+import MydataStructure.NodeData;
+import MydataStructure.edge_data;
+import MydataStructure.graph;
+import MydataStructure.node_data;
 
 
 

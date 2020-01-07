@@ -1,4 +1,4 @@
-package utils;
+package MyUtils;
 
 //package stdDraw;
 // https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java.html
