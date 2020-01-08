@@ -1,8 +1,12 @@
 package Tests;
-import algorithms.*;
-import dataStructure.*;
-import gui.GuiGraph;
-import utils.*;
+import MyAlgorithms.*;
+import MyUtils.*;
+import MydataStructure.DGraph;
+import MydataStructure.NodeData;
+import MydataStructure.graph;
+import MydataStructure.node_data;
+import gameClient.MyGameGui;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;

@@ -6,9 +6,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import algorithms.*;
-import dataStructure.*;
-import utils.*;
+import MyAlgorithms.*;
+import MydataStructure.*;
+import gameClient.MyGameGui;
+import MyUtils.*;
 import gui.*;
 
 /**
@@ -56,7 +57,7 @@ class Ex2Test {
 		return ans;
 	}
 	boolean drawGraph(graph g) { 
-		GuiGraph gr=new GuiGraph(g);
+		MyGameGui gr=new MyGameGui(g);
 		return true;
 
 	}

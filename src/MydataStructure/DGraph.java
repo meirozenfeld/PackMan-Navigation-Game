@@ -24,12 +24,12 @@ public class DGraph implements graph, Serializable{
 		this.mc=0;
 	}
 	public void init(String j) throws JSONException {
-		JSONObject jo = new JSONObject(j);
+		JSONObject jo = new JSONObject(j); // read all text to json file
 		try {
-			JSONArray arrayN = jo.getJSONArray("Nodes");
-			JSONArray arrayE = jo.getJSONArray("Edges");
+			JSONArray arrayN = jo.getJSONArray("Nodes"); // array to nodes
+			JSONArray arrayE = jo.getJSONArray("Edges"); // array to edges
 
-			for (int i = 0; i <  arrayN.length(); i++) 
+			for (int i = 0; i <  arrayN.length(); i++) //bulid nodes for graph
 			{
 				JSONObject oN= arrayN.getJSONObject(i);
 				int id=oN.getInt("id");
@@ -39,14 +39,15 @@ public class DGraph implements graph, Serializable{
 				this.Nodes.put(k ,v);
 				this.Edges.put(v, new Hashtable<Integer,edge_data>());
 			}
-			for (int i = 0; i <  arrayE.length(); i++) 
+			for (int i = 0; i <  arrayE.length(); i++) //bulid edges for graph
 			{
 				JSONObject oE= arrayE.getJSONObject(i);
 				int src=oE.getInt("src");
 				double w=oE.getInt("w");
 				int dest=oE.getInt("dest");
-				edge_data e=new EdgeData(src,dest,w);
-				Edges.get(Nodes.get(src)).put(dest, e);
+				connect(src,dest,w);
+//				edge_data e=new EdgeData(src,dest,w);
+//				Edges.get(Nodes.get(src)).put(dest, e);
 			}
 		} catch(Exception e) {e.printStackTrace();}
 	}

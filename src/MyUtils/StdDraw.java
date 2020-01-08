@@ -7,6 +7,15 @@ package MyUtils;
  *  Execution:    java StdDraw
  *  Dependencies: none
  *
+ *package utils;
+
+//package stdDraw;
+// https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java.html
+/******************************************************************************
+ *  Compilation:  javac StdDraw.java
+ *  Execution:    java StdDraw
+ *  Dependencies: none
+ *
  *
  *  Standard drawing library. This class provides a basic capability for
  *  creating drawings with your programs. It uses a simple graphics model that
@@ -30,6 +39,7 @@ package MyUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FileDialog;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -68,17 +78,29 @@ import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+
+import org.json.JSONException;
+
+import MyAlgorithms.Graph_Algo;
+import MydataStructure.DGraph;
+import MydataStructure.NodeData;
+import dataStructure.graph;
+import dataStructure.node_data;
+import gameClient.MyGameGui;
 
 /**
  *  The {@code StdDraw} class provides a basic capability for
  *  creating drawings with your programs. It uses a simple graphics model that
- *  allows you to create drawings consisting of points, lines, squares, 
+ *  allows you to create drawings consisting of points, lines, squares,
  *  circles, and other geometric shapes in a window on your computer and
  *  to save the drawings to a file. Standard drawing also includes
  *  facilities for text, color, pictures, and animation, along with
@@ -247,7 +269,7 @@ import javax.swing.KeyStroke;
  *  <li> {@link #setScale(double min, double max)}
  *  </ul>
  *  <p>
- *  The arguments are the coordinates of the minimum and maximum 
+ *  The arguments are the coordinates of the minimum and maximum
  *  <em>x</em>- or <em>y</em>-coordinates that will appear in the canvas.
  *  For example, if you  wish to use the default coordinate system but
  *  leave a small margin, you can call {@code StdDraw.setScale(-.05, 1.05)}.
@@ -311,7 +333,7 @@ import javax.swing.KeyStroke;
  *  <p>
  *  The supported image formats are JPEG and PNG. The filename must have either the
  *  extension .jpg or .png.
- *  We recommend using PNG for drawing that consist solely of geometric shapes and JPEG 
+ *  We recommend using PNG for drawing that consist solely of geometric shapes and JPEG
  *  for drawings that contains pictures.
  *  <p>
  *  <b>Clearing the canvas.</b>
@@ -346,7 +368,7 @@ import javax.swing.KeyStroke;
  *  all drawing takes place on the <em>offscreen canvas</em>. The offscreen canvas
  *  is not displayed. Only when you call
  *  {@link #show()} does your drawing get copied from the offscreen canvas to
- *  the onscreen canvas, where it is displayed in the standard drawing window. You 
+ *  the onscreen canvas, where it is displayed in the standard drawing window. You
  *  can think of double buffering as collecting all of the lines, points, shapes,
  *  and text that you tell it to draw, and then drawing them all
  *  <em>simultaneously</em>, upon request.
@@ -480,6 +502,9 @@ import javax.swing.KeyStroke;
  */
 public final class StdDraw implements ActionListener, MouseListener, MouseMotionListener, KeyListener {
 
+
+	static MyGameGui GG;
+
 	/**
 	 *  The color black.
 	 */
@@ -592,7 +617,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 	// boundary of drawing canvas, 0% border
 	// private static final double BORDER = 0.05;
-	private static final double BORDER = 0.00;
+	private static final double BORDER = 0.05;
 	private static final double DEFAULT_XMIN = 0.0;
 	private static final double DEFAULT_XMAX = 1.0;
 	private static final double DEFAULT_YMIN = 0.0;
@@ -715,13 +740,38 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	// create the menu bar (changed to private)
 	private static JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("File");
+		JMenu menu = new JMenu("Menu");
 		menuBar.add(menu);
-		JMenuItem menuItem1 = new JMenuItem(" Save...   ");
+		JMenuItem menuItem1 = new JMenuItem("Manual");
+		JMenuItem menuItem3 = new JMenuItem("Computer");
 		menuItem1.addActionListener(std);
-		menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		menuItem3.addActionListener(std);
+
 		menu.add(menuItem1);
+
+		menu.add(menuItem3);
+		//		///
+		//		JMenu menu2 = new JMenu("File");
+		//		menuBar.add(menu2);
+		//		JMenuItem menuItem2 = new JMenuItem("save");
+		//		menuItem2.addActionListener(std);
+		//		menu2.add(menuItem2);
+		//		JMenuItem menuItem4 = new JMenuItem("load");
+		//		menuItem4.addActionListener(std);
+		//		menu2.add(menuItem4);
+		// JMenuItem menuItem5 = new JMenuItem("shortest Path");
+		// menuItem5.addActionListener(std);
+		// menu2.add(menuItem5);
+		// JMenuItem menuItem6 = new JMenuItem("TSP");
+		// menuItem6.addActionListener(std);
+		// menu2.add(menuItem6);
+		//
+		// JMenu menu3 = new JMenu("test");
+		// menuBar.add(menu3);
+		// JMenuItem menuItem7 = new JMenuItem("test1");
+		// menuItem7.addActionListener(std);
+		// menu3.add(menuItem7);
+
 		return menuBar;
 	}
 
@@ -1191,7 +1241,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 
 	/**
-	 * Draws a polygon with the vertices 
+	 * Draws a polygon with the vertices
 	 * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
 	 * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
 	 * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
@@ -1220,7 +1270,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	}
 
 	/**
-	 * Draws a polygon with the vertices 
+	 * Draws a polygon with the vertices
 	 * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
 	 * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
 	 * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
@@ -1303,7 +1353,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = new URL(filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1313,7 +1363,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = StdDraw.class.getResource(filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1323,7 +1373,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = StdDraw.class.getResource("/" + filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1577,7 +1627,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	}
 
 	/**
-	 * Enable double buffering. All subsequent calls to 
+	 * Enable double buffering. All subsequent calls to
 	 * drawing methods such as {@code line()}, {@code circle()},
 	 * and {@code square()} will be deffered until the next call
 	 * to show(). Useful for animations.
@@ -1587,7 +1637,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	}
 
 	/**
-	 * Disable double buffering. All subsequent calls to 
+	 * Disable double buffering. All subsequent calls to
 	 * drawing methods such as {@code line()}, {@code circle()},
 	 * and {@code square()} will be displayed on screen when called.
 	 * This is the default.
@@ -1642,24 +1692,43 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				e.printStackTrace();
 			}
 		}
-
 		else {
 			System.out.println("Invalid image file type: " + suffix);
 		}
+	}
+	public static void setGuiGraph(MyGameGui Gui) {
+		GG=Gui;
 	}
 
 
 	/**
 	 * This method cannot be called directly.
 	 */
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
-		chooser.setVisible(true);
-		String filename = chooser.getFile();
-		if (filename != null) {
-			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+		// FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
+		// chooser.setVisible(true);
+		// String filename = chooser.getFile();
+		// if (filename != null)
+		// {
+		// StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+		// }
+
+		String act = e.getActionCommand();
+		switch(act)
+		{
+		case "Manual": 
+			try {
+				GG.manual();
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+		default : 
 		}
+
 	}
 
 
@@ -1871,7 +1940,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	}
 
 
-
+	public static void setGUI(MyGameGui g)
+	{
+		GG = g;
+	}
 
 	/**
 	 * Test client.
@@ -1904,5 +1976,3 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 }
 
 
-//Copyright © 2000–2017, Robert Sedgewick and Kevin Wayne. 
-//Last updated: Mon Aug 27 16:43:47 EDT 2018.
