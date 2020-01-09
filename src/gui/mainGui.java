@@ -71,7 +71,7 @@ public class mainGui {
 		node_data v7 = new NodeData(7, g);
 		//node_data v8 = new Node(8, h);
 		//
-		graph grap = new DGraph();
+		DGraph grap = new DGraph();
 		// graph_algorithms test = new Graph_Algo();
 		// test.init(grap);
 		grap.addNode(v1);
@@ -100,7 +100,7 @@ public class mainGui {
 		grap.connect(v6.getKey(), v5.getKey(), 1);
 		grap.connect(v4.getKey(), v6.getKey(), 3);
 		// Window window = new Window();
-		MyGameGui window = new MyGameGui(grap);
+		MyGameGui window = new MyGameGui();
 
 		// window.setVisible(true);
 

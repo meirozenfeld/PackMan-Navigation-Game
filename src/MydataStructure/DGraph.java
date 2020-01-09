@@ -14,8 +14,10 @@ import java.io.Serializable;
 public class DGraph implements graph, Serializable{
 	private Hashtable  <Integer, node_data> Nodes;
 	private Hashtable <node_data,Hashtable<Integer, edge_data>> Edges; // hashtable into hashtable with Node key (and dest key)
+
 	private int edgeSize;
 	private int mc=0; // mode count
+
 
 	public DGraph() {
 		Nodes=new Hashtable <Integer, node_data>();
@@ -23,12 +25,11 @@ public class DGraph implements graph, Serializable{
 		edgeSize=0;
 		this.mc=0;
 	}
-	public void init(String j) throws JSONException {
-		JSONObject jo = new JSONObject(j); // read all text to json file
+	public void init(String strG) throws JSONException {
+		JSONObject jo = new JSONObject(strG); // read all text to json file
 		try {
 			JSONArray arrayN = jo.getJSONArray("Nodes"); // array to nodes
 			JSONArray arrayE = jo.getJSONArray("Edges"); // array to edges
-
 			for (int i = 0; i <  arrayN.length(); i++) //bulid nodes for graph
 			{
 				JSONObject oN= arrayN.getJSONObject(i);
@@ -46,11 +47,11 @@ public class DGraph implements graph, Serializable{
 				double w=oE.getInt("w");
 				int dest=oE.getInt("dest");
 				connect(src,dest,w);
-//				edge_data e=new EdgeData(src,dest,w);
-//				Edges.get(Nodes.get(src)).put(dest, e);
 			}
 		} catch(Exception e) {e.printStackTrace();}
 	}
+	
+
 	@Override
 	public node_data getNode(int key) {
 		return Nodes.get(key);
@@ -70,7 +71,10 @@ public class DGraph implements graph, Serializable{
 		this.Edges.put(n, new Hashtable<Integer,edge_data>());
 		this.mc++;
 	}
-
+//	public void addFruit(node_data n) {
+//		int k=n.getKey();
+//		this.Fruits.put(k ,n);
+//	}
 	@Override
 	public void connect(int src, int dest, double w) {
 		try {
@@ -88,6 +92,7 @@ public class DGraph implements graph, Serializable{
 	public Collection<node_data> getV() {
 		return this.Nodes.values();
 	}
+
 
 	@Override
 	public Collection<edge_data> getE(int node_id) {
