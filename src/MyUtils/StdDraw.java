@@ -1701,6 +1701,28 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	}
 
 
+	Thread t;
+	private void threadTest()
+	{
+		t = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try
+				{
+				GG.manual();
+				t.interrupt();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		t.start();
+	}
+	
+	
 	/**
 	 * This method cannot be called directly.
 	 */
@@ -1720,8 +1742,8 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		{
 		case "Manual": 
 			try {
-				GG.manual();
-			} catch (JSONException e1) {
+				threadTest();
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -1789,6 +1811,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// this body is intentionally left empty
+		GG.setxsety(StdDraw.userX(e.getX()), StdDraw.userY(e.getY()));
 	}
 
 	/**

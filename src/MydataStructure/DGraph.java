@@ -44,7 +44,7 @@ public class DGraph implements graph, Serializable{
 			{
 				JSONObject oE= arrayE.getJSONObject(i);
 				int src=oE.getInt("src");
-				double w=oE.getInt("w");
+				double w=oE.getDouble("w");
 				int dest=oE.getInt("dest");
 				connect(src,dest,w);
 			}
