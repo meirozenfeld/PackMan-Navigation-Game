@@ -742,14 +742,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menu = new JMenu("Menu");
 		menuBar.add(menu);
-		JMenuItem menuItem1 = new JMenuItem("Manual");
-		JMenuItem menuItem3 = new JMenuItem("Computer");
-		menuItem1.addActionListener(std);
-		menuItem3.addActionListener(std);
+		JMenuItem manualGame = new JMenuItem("Manual game");
+		JMenuItem autoGame = new JMenuItem("Automatic game");
+		manualGame.addActionListener(std);
+		autoGame.addActionListener(std);
 
-		menu.add(menuItem1);
+		menu.add(manualGame);
 
-		menu.add(menuItem3);
+		menu.add(autoGame);
 		//		///
 		//		JMenu menu2 = new JMenu("File");
 		//		menuBar.add(menu2);
@@ -1673,8 +1673,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		}
 
-		// need to change from ARGB to RGB for JPEG
-		// reference: http://archives.java.sun.com/cgi-bin/wa?A2=ind0404&L=java2d-interest&D=0&P=2727
 		else if ("jpg".equalsIgnoreCase(suffix)) {
 			WritableRaster raster = onscreenImage.getRaster();
 			WritableRaster newRaster;
@@ -1700,26 +1698,50 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		GG=Gui;
 	}
 
-
-	Thread t;
-	private void threadTest()
+/*
+ * thred function to manual option
+ */
+	Thread tm;
+	private void manualThread()
 	{
-		t = new Thread(new Runnable() {
+		tm = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				try
 				{
 				GG.manual();
-				t.interrupt();
+				tm.interrupt();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		t.start();
+		tm.start();
+	}
+	
+	/*
+	 * thred function to automatic option
+	 */
+	Thread ta;
+	private void autoThread()
+	{
+		ta = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try
+				{
+				GG.automatic();
+				ta.interrupt();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		ta.start();
 	}
 	
 	
@@ -1740,14 +1762,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		String act = e.getActionCommand();
 		switch(act)
 		{
-		case "Manual": 
+		case "Manual game": 
 			try {
-				threadTest();
+				manualThread();
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			break;
+		case "Automatic game":
+			
 		default : 
 		}
 
@@ -1811,7 +1835,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// this body is intentionally left empty
-		GG.setxsety(StdDraw.userX(e.getX()), StdDraw.userY(e.getY()));
+		GG.setXY(StdDraw.userX(e.getX()), StdDraw.userY(e.getY()));
 	}
 
 	/**

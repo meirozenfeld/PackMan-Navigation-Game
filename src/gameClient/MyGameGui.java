@@ -40,17 +40,15 @@ import Server.game_service;
 public class MyGameGui 
 {
 	graph gr;
-	//MyGameGui G;
 	static boolean Allreadydone = false;
 	private final double EPS=0.000001;
+	private final double clickEPS=0.00051;
+
 	//	private Hashtable  <Integer, node_data> Fruits; // hashtable for fruits
 	ArrayList<node_data> fruits = new ArrayList<node_data>(); //list for fruits
 	ArrayList<node_data> robots = new ArrayList<node_data>(); //list for fruits
-
-	//	private int idF=0; // key for fruit
-	LinkedList<Point3D> points = new LinkedList<Point3D>();
 	ArrayList<node_data> sp = new ArrayList<node_data>(); // for shortestPath
-	//	node_data fr=new NodeData();
+
 	double minx = Integer.MAX_VALUE;
 	double miny = Integer.MAX_VALUE;
 	double maxx = Integer.MIN_VALUE;
@@ -62,7 +60,6 @@ public class MyGameGui
 	public MyGameGui()
 	{
 		gr = new DGraph();
-		//		Fruits=new Hashtable <Integer, node_data>();	
 		fruits= new ArrayList<node_data>();
 		robots= new ArrayList<node_data>();
 		initGUI();
@@ -74,7 +71,7 @@ public class MyGameGui
 		this.gr = g;
 		initGUI();
 	}
-	public void setxsety(double x,double y)
+	public void setXY(double x,double y)
 	{
 		this.x=x;
 		this.y =y;
@@ -328,17 +325,17 @@ public class MyGameGui
 		return ans;
 	}
 	public void manual() throws JSONException {
+		//choose senario, draw senario.
 		JFrame sen= new JFrame();
 		String i = JOptionPane.showInputDialog(sen,"Choose senario game between 0-23");
 		game_service game = Game_Server.getServer(Integer.parseInt(i));
-
 		String g = game.getGraph();
 		DGraph gg = new DGraph();
 		gg.init(g); // add graph
 		String infoGame = game.toString();
 		System.out.println(infoGame);
-
-
+		
+		
 		DF(); //defoult this.Fruits
 		for(String f:game.getFruits()) // add fruits
 		{
@@ -346,13 +343,12 @@ public class MyGameGui
 			System.out.println(f);
 		}
 
-
 		DR(); //defoult this.Fruits
 		this.gr=gg;
-		smartPosition ();
+		smartPosition (); // smart start position of robots
 		int rt=initInfoGame(infoGame); // how many robots in the game
-		int maxF=400;  
-		while(maxF>=1) // loop to position on the edge with the most fruits
+		int maxF=fruits.size();  
+		while(maxF>0) // loop to position on the edge with the most fruits
 		{
 			for(node_data v: gr.getV())
 			{
@@ -371,52 +367,56 @@ public class MyGameGui
 			System.out.println(r);
 		}
 		initGUI();
+		
+		//start manual game
 		game.startGame();
-
-		node_data theRob=null;
+		node_data selRob=null; // default selected robot
 		while(game.isRunning())
 		{
-			
-			DR();
-			List<String> a = game.getRobots();
+			//update robots and fruits
+			long t = game.timeToEnd();
+			System.out.println("Time to end: "+t/1000);
+//			DR();
+			List<String> currR = game.getRobots();
 			robots.clear();
-			for (String str : a) {
+			for (String str : currR) 
+			{
 				initRobots(str);
 			}
-			if(theRob!=null)
+			if(selRob!=null)
 			{
-				for (node_data Currrob : robots) {
-					theRob.setLocation(Currrob.getLocation());
+				for (node_data Currrob : robots)
+				{
+					selRob.setLocation(Currrob.getLocation());
 				}
 			}
-			DF();
+//			DF();
 			List<String> currF = game.getFruits();
 			fruits.clear();
-			for (String string : currF) {
+			for (String string : currF) 
+			{
 				initFruit(string);
 			}
 			paint();
 			
 			
-			long t = game.timeToEnd();
+			//check robot move by clicks
 			Point3D CurrClick = new Point3D(this.x, this.y);
 
 			if(!RobotClicked)
 			{
-				for(node_data rob : robots)
+				for(node_data rob : robots) 
 				{
 
-					Point3D robPos = rob.getLocation();
+					Point3D robPos = rob.getLocation(); 
 					//					System.out.println(robPos);
 					//System.err.println(CurrClick);
-					if(robPos.distance2D(CurrClick) <= 0.0001)
+					if(robPos.distance2D(CurrClick) <= clickEPS) // distance between click to robot
 					{
-						theRob = rob;
-						RobotClicked = true;
-						System.out.println("Rob selceted");
-						System.out.println(theRob.getLocation());
-						x=0;
-						y=0;
+						selRob = rob;
+						RobotClicked = true;	
+						this.x=0;
+						this.y=0;
 						break;
 					}
 				}
@@ -424,55 +424,153 @@ public class MyGameGui
 			else {
 				Collection<node_data> nd = gr.getV();
 				//				Point3D CurrClick = new Point3D(this.x, this.y);
-				for (node_data node_data : nd) {
-					Point3D currNode = node_data.getLocation();
-					if(currNode.distance2D(CurrClick) <= 0.0001)
+				for (node_data v : nd) 
+				{
+					Point3D currNode = v.getLocation();
+					if(currNode.distance2D(CurrClick) <= clickEPS)//distance between click to vertex
 					{
-
-
-						game.chooseNextEdge(0, node_data.getKey());
-
+						game.chooseNextEdge(selRob.getKey(), v.getKey());
 						RobotClicked = false;
-
-						x=0;
-						y=0;
-						
-
+						this.x=0;
+						this.y=0;
 						break;
 					}
 				}
 			}
-			game.move();
+			game.move(); // move the robot to requested location
 			paint();
-			
-
 		}
 		System.out.println(game.toString());
+		JFrame go= new JFrame(); // window to game over
+		JOptionPane.showMessageDialog(go, "Game Over");
+		game.stopGame();
+		fruits.clear();
+		robots.clear();
 		//			System.out.println("Time to end: "+t/1000);
-
-		//					try {
-		//						line = new JSONObject(robot_json);
-		//						JSONObject ttt = line.getJSONObject("Robot");
-		//						int rid = ttt.getInt("id");
-		//						int src = ttt.getInt("src");
-		//						int dest = ttt.getInt("dest");
-		//						
-		//						if(dest==-1) {	
-		//							dest = nextNode(gg, src);
-		//							game.chooseNextEdge(rid, dest);
-		//							System.out.println("Turn to node: "+dest);
-		//							System.out.println(ttt);
-		//						}
-		//					} catch (JSONException e) {
-		//						// TODO Auto-generated catch block
-		//						e.printStackTrace();
-		//					}
-		//			}
-		//		game.stopGame();
 	}
 
 
+	public void automatic() throws JSONException {
+		//choose senario, draw senario.
+		JFrame sen= new JFrame();
+		String i = JOptionPane.showInputDialog(sen,"Choose senario game between 0-23");
+		game_service game = Game_Server.getServer(Integer.parseInt(i));
+		String g = game.getGraph();
+		DGraph gg = new DGraph();
+		gg.init(g); // add graph
+		String infoGame = game.toString();
+		System.out.println(infoGame);
+		
+		DF(); //defoult this.Fruits
+		for(String f:game.getFruits()) // add fruits
+		{
+			initFruit(f); //read json fruit and add to this.Fruits
+			System.out.println(f);
+		}
 
+		DR(); //defoult this.Fruits
+		this.gr=gg;
+		smartPosition (); // smart start position of robots
+		int rt=initInfoGame(infoGame); // how many robots in the game
+		int maxF=fruits.size();  
+		while(maxF>0) // loop to position on the edge with the most fruits
+		{
+			for(node_data v: gr.getV())
+			{
+				if(rt>0&&v.getTag()==maxF)
+				{
+					game.addRobot(v.getKey());
+					rt--;
+				}
+			}
+			maxF--;
+		}
+
+		for(String r:game.getRobots()) // add fruits
+		{
+			initRobots(r); //read json robots and add to this.robots
+			System.out.println(r);
+		}
+		initGUI();
+		
+		//start manual game
+		game.startGame();
+		node_data selRob=null; // default selected robot
+		while(game.isRunning())
+		{
+			//update robots and fruits
+			long t = game.timeToEnd();
+//			System.out.println("Time to end: "+t/1000);
+//			DR();
+			List<String> currR = game.getRobots();
+			robots.clear();
+			for (String str : currR) 
+			{
+				initRobots(str);
+			}
+			if(selRob!=null)
+			{
+				for (node_data Currrob : robots)
+				{
+					selRob.setLocation(Currrob.getLocation());
+				}
+			}
+//			DF();
+			List<String> currF = game.getFruits();
+			fruits.clear();
+			for (String string : currF) 
+			{
+				initFruit(string);
+			}
+			paint();
+			
+			
+			//check robot move by clicks
+			Point3D CurrClick = new Point3D(this.x, this.y);
+
+			if(!RobotClicked)
+			{
+				for(node_data rob : robots) 
+				{
+
+					Point3D robPos = rob.getLocation(); 
+					//					System.out.println(robPos);
+					//System.err.println(CurrClick);
+					if(robPos.distance2D(CurrClick) <= clickEPS) // distance between click to robot
+					{
+						selRob = rob;
+						RobotClicked = true;
+						System.out.println("Rob selceted");
+						System.out.println(selRob.getLocation());
+						this.x=0;
+						this.y=0;
+						break;
+					}
+				}
+			}
+			else {
+				Collection<node_data> nd = gr.getV();
+				//				Point3D CurrClick = new Point3D(this.x, this.y);
+				for (node_data v : nd) 
+				{
+					Point3D currNode = v.getLocation();
+					if(currNode.distance2D(CurrClick) <= clickEPS)//distance between click to vertex
+					{
+						game.chooseNextEdge(selRob.getKey(), v.getKey());
+						RobotClicked = false;
+						this.x=0;
+						this.y=0;
+						break;
+					}
+				}
+			}
+			game.move(); // move the robot to requested location
+			paint();
+		}
+		System.out.println(game.toString());
+		game.stopGame();
+		//			System.out.println("Time to end: "+t/1000);
+	}
 
 
 }
