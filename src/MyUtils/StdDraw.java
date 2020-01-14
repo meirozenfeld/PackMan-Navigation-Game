@@ -740,16 +740,17 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	// create the menu bar (changed to private)
 	private static JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("Menu");
+		JMenu menu = new JMenu("Play");
 		menuBar.add(menu);
 		JMenuItem manualGame = new JMenuItem("Manual game");
 		JMenuItem autoGame = new JMenuItem("Automatic game");
+//		JMenuItem stopGame = new JMenuItem("Stop game");
 		manualGame.addActionListener(std);
 		autoGame.addActionListener(std);
 
 		menu.add(manualGame);
-
 		menu.add(autoGame);
+//		menu.add(stopGame);
 		//		///
 		//		JMenu menu2 = new JMenu("File");
 		//		menuBar.add(menu2);
@@ -1751,13 +1752,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
-		// chooser.setVisible(true);
-		// String filename = chooser.getFile();
-		// if (filename != null)
-		// {
-		// StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
-		// }
 
 		String act = e.getActionCommand();
 		switch(act)
@@ -1766,12 +1760,17 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			try {
 				manualThread();
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			break;
 		case "Automatic game":
-			
+			try {
+				autoThread();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		
+			break;
 		default : 
 		}
 

@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -43,25 +44,21 @@ public class MyGameGui
 	static boolean Allreadydone = false;
 	private final double EPS=0.000001;
 	private final double clickEPS=0.00051;
-
-	//	private Hashtable  <Integer, node_data> Fruits; // hashtable for fruits
-	ArrayList<node_data> fruits = new ArrayList<node_data>(); //list for fruits
-	ArrayList<node_data> robots = new ArrayList<node_data>(); //list for fruits
-	ArrayList<node_data> sp = new ArrayList<node_data>(); // for shortestPath
-
+	ArrayList<node_fruit> fruits = new ArrayList<node_fruit>(); //list for fruits
+	ArrayList<node_robot> robots = new ArrayList<node_robot>(); //list for robots
 	double minx = Integer.MAX_VALUE;
 	double miny = Integer.MAX_VALUE;
 	double maxx = Integer.MIN_VALUE;
 	double maxy = Integer.MIN_VALUE;
-	double x;
-	double y;
-	boolean RobotClicked = false;
+	double x; // x of click
+	double y; // y of click
+	boolean RobotClicked = false; // if robot clicked or not (for manual game)
 
 	public MyGameGui()
 	{
 		gr = new DGraph();
-		fruits= new ArrayList<node_data>();
-		robots= new ArrayList<node_data>();
+		fruits= new ArrayList<node_fruit>();
+		robots= new ArrayList<node_robot>();
 		initGUI();
 	}
 
@@ -74,26 +71,23 @@ public class MyGameGui
 	public void setXY(double x,double y)
 	{
 		this.x=x;
-		this.y =y;
+		this.y=y;
 		//System.err.println(x + " " + y);
 	}
-	public MyGameGui(graph g,ArrayList<node_data> fruits , ArrayList<node_data> robots )
+	public MyGameGui(graph g,ArrayList<node_fruit> fruits , ArrayList<node_robot> robots )
 	{
 		this.gr = g;
-		//		this.Fruits=Fruits;
 		this.fruits=fruits;
 		this.robots=robots;
 		initGUI();
 	}
 	public void DF() //defoult this.Fruits
 	{
-		//		Fruits=new Hashtable <Integer, node_data>();
-		fruits=new ArrayList<node_data>();
+		fruits=new ArrayList<node_fruit>();
 	}
-	public void DR() //defoult this.Fruits
+	public void DR() //defoult this.robots
 	{
-
-		robots=new ArrayList<node_data>();
+		robots=new ArrayList<node_robot>();
 	}
 	private void initGUI()
 	{
@@ -148,9 +142,9 @@ public class MyGameGui
 			int type = fr.getInt("type");
 			String pos=fr.getString("pos");
 			Point3D p=new Point3D(pos);
-			node_data v=new NodeData(p, type);
+			node_fruit v=new NodeFruit(p, type);
+			v.setWithRobot(0);
 			this.fruits.add(v);
-			//			idF++;
 		} catch(Exception e){
 			e.printStackTrace();
 		}
@@ -167,7 +161,7 @@ public class MyGameGui
 			int dest = ro.getInt("dest");
 			String pos=ro.getString("pos");
 			Point3D p=new Point3D(pos);
-			node_data v=new NodeData(id,p);
+			node_robot v=new NodeRobot(id,src,p);
 			this.robots.add(v);
 		} catch(Exception e){
 			e.printStackTrace();
@@ -191,12 +185,6 @@ public class MyGameGui
 	{	
 		StdDraw.clear();
 		if(gr!=null) {
-
-			//			if(fr.getTag()==1)StdDraw.setPenColor(Color.PINK); // apple
-			//			if(fr.getTag()!=-1)StdDraw.setPenColor(Color.YELLOW); // banana
-			//			StdDraw.filledCircle(fr.getLocation().x(),fr.getLocation().y(),(maxx-minx)*0.005);
-			//		
-
 			for (node_data v : gr.getV()) // paint vertex
 			{
 				StdDraw.setPenColor(Color.BLACK);
@@ -206,14 +194,6 @@ public class MyGameGui
 				StdDraw.setPenColor(Color.RED);
 				for(edge_data ed: e) // paint edges
 				{
-					//				if(this.sp.contains(v)) // if shortPath contain vertex from graph
-					//				{
-					//					if(ed.getTag()==1)
-					//					{
-					//						StdDraw.setPenColor(Color.GREEN);
-					//						ed.setTag(0);						
-					//					}
-					//				}
 					double xs=gr.getNode(ed.getSrc()).getLocation().x();// x src
 					double ys=gr.getNode(ed.getSrc()).getLocation().y();// y src
 					double xd=gr.getNode(ed.getDest()).getLocation().x();// x dest
@@ -238,24 +218,23 @@ public class MyGameGui
 			{
 				int i =robots.size();
 				Color arr []= {Color.ORANGE,Color.DARK_GRAY,Color.MAGENTA,Color.LIGHT_GRAY,Color.CYAN}; // arr for robots color, max robots=5
-				for(node_data r:robots)
+				for(node_robot r:robots)
 				{
 					StdDraw.setPenColor(arr[i]);
-					//StdDraw.circle(gr.getNode(r.getKey()).getLocation().x(),gr.getNode(r.getKey()).getLocation().y(),(maxx-minx)*0.010);
-					StdDraw.circle(r.getLocation().x(),r.getLocation().y(),(maxx-minx)*0.010);
+					StdDraw.filledCircle(r.getLocation().x(),r.getLocation().y(),(maxx-minx)*0.010);
 					i--;
 				}
 			}
 			if(fruits!=null) // paint fruits
 			{
-				for(node_data f:fruits)
+				for(node_fruit f:fruits)
 				{
-					if(f.getTag()==1) // apple
+					if(f.getType()==1) // apple
 					{
 						StdDraw.setPenColor(Color.PINK);
 						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
 					}
-					if(f.getTag()==-1) // banana
+					if(f.getType()==-1) // banana
 					{
 						StdDraw.setPenColor(Color.YELLOW);
 						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
@@ -286,7 +265,7 @@ public class MyGameGui
 		{
 			for(edge_data e:gr.getE(v.getKey()))
 			{
-				for(node_data f:fruits)
+				for(node_fruit f:fruits)
 				{
 					double dx1=v.getLocation().x()-gr.getNode(e.getDest()).getLocation().x();
 					double dy1=v.getLocation().y()-gr.getNode(e.getDest()).getLocation().y();
@@ -302,16 +281,41 @@ public class MyGameGui
 
 					if(Math.abs(disN-(disSF+disDF))<this.EPS) // if the fruit is on the edge
 					{
-						int a=v.getTag();
-						if(f.getTag()==1)v.setTag(++a); 
+						int av=v.getTag();
+						int ae=e.getTag();
+						if(f.getType()==1)
+						{
+							v.setTag(++av); 
+							e.setTag(++ae);
+						}
 
-						int b=gr.getNode(e.getDest()).getTag();
-						if(f.getTag()==-1)gr.getNode(e.getDest()).setTag(++b);
+						int bv=gr.getNode(e.getDest()).getTag();
+						if(f.getType()==-1)
+						{
+							gr.getNode(e.getDest()).setTag(++bv);
+							e.setTag(++ae);
+						}
+						f.setSrc(e.getSrc());
+						f.setDest(e.getDest());
+
 					}
 				}
 			}
 		}
 	}
+
+	public void initTag()
+	{
+		for(node_data v: gr.getV())
+		{
+			v.setTag(0);
+			for(edge_data e:gr.getE(v.getKey()))
+			{
+				e.setTag(0);
+			}
+		}
+	}
+
 	private static int nextNode(graph g, int src)
 	{
 		int ans = -1;
@@ -324,6 +328,7 @@ public class MyGameGui
 		ans = itr.next().getDest();
 		return ans;
 	}
+
 	public void manual() throws JSONException {
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
@@ -333,9 +338,9 @@ public class MyGameGui
 		DGraph gg = new DGraph();
 		gg.init(g); // add graph
 		String infoGame = game.toString();
-		System.out.println(infoGame);
-		
-		
+//		System.out.println(infoGame);
+
+
 		DF(); //defoult this.Fruits
 		for(String f:game.getFruits()) // add fruits
 		{
@@ -367,16 +372,17 @@ public class MyGameGui
 			System.out.println(r);
 		}
 		initGUI();
-		
+		JFrame s= new JFrame(); // window to start game
+		JOptionPane.showMessageDialog(s, "To start playing click ~ok~, select a robot to start moving ");
 		//start manual game
 		game.startGame();
-		node_data selRob=null; // default selected robot
+		node_robot selRob=null; // default selected robot
 		while(game.isRunning())
 		{
 			//update robots and fruits
 			long t = game.timeToEnd();
 			System.out.println("Time to end: "+t/1000);
-//			DR();
+			//			DR();
 			List<String> currR = game.getRobots();
 			robots.clear();
 			for (String str : currR) 
@@ -385,12 +391,12 @@ public class MyGameGui
 			}
 			if(selRob!=null)
 			{
-				for (node_data Currrob : robots)
+				for (node_robot Currrob : robots)
 				{
 					selRob.setLocation(Currrob.getLocation());
 				}
 			}
-//			DF();
+			//			DF();
 			List<String> currF = game.getFruits();
 			fruits.clear();
 			for (String string : currF) 
@@ -398,14 +404,14 @@ public class MyGameGui
 				initFruit(string);
 			}
 			paint();
-			
-			
+
+
 			//check robot move by clicks
 			Point3D CurrClick = new Point3D(this.x, this.y);
 
 			if(!RobotClicked)
 			{
-				for(node_data rob : robots) 
+				for(node_robot rob : robots) 
 				{
 
 					Point3D robPos = rob.getLocation(); 
@@ -415,6 +421,7 @@ public class MyGameGui
 					{
 						selRob = rob;
 						RobotClicked = true;	
+						System.out.println("Robot sel");
 						this.x=0;
 						this.y=0;
 						break;
@@ -427,10 +434,11 @@ public class MyGameGui
 				for (node_data v : nd) 
 				{
 					Point3D currNode = v.getLocation();
-					if(currNode.distance2D(CurrClick) <= clickEPS)//distance between click to vertex
+					if(currNode.distance2D(CurrClick) <= clickEPS&& selRob.getLocation().distance2D(CurrClick)>=clickEPS)//distance between click to vertex (except vertex himself)
 					{
-						game.chooseNextEdge(selRob.getKey(), v.getKey());
+						game.chooseNextEdge(selRob.getId(), v.getKey());
 						RobotClicked = false;
+						System.out.println("Dest sel");
 						this.x=0;
 						this.y=0;
 						break;
@@ -450,6 +458,86 @@ public class MyGameGui
 	}
 
 
+/*
+ * function to automat game
+ */
+	private void moveAuto(game_service game) throws JSONException {
+		Graph_Algo ga=new Graph_Algo();
+		ga.init(gr);
+		node_fruit wantedFruit=new NodeFruit();
+		for(node_robot rob: robots)
+		{
+			double minDist=Double.MAX_VALUE; // veriable to shortest distance
+			for(node_fruit f: fruits)
+			{
+				if(f.getWithRobot()==0)
+				{
+					if(f.getType()==1) //apple= src to dest
+					{
+						double tmp= ga.shortestPathDist(rob.getSrc(),f.getSrc());
+						tmp+= ga.shortestPathDist(f.getSrc(),f.getDest());
+						if(tmp<minDist)
+						{
+							minDist=tmp;
+							wantedFruit=f;
+						}
+					}
+					else // banana dest to src
+					{
+						double tmp= ga.shortestPathDist(rob.getSrc(),f.getDest());
+						tmp+= ga.shortestPathDist(f.getDest(),f.getSrc());
+
+						if(tmp<minDist)
+						{
+							minDist=tmp;
+							wantedFruit=f;
+						}
+					}
+				}
+			}
+			if(wantedFruit.getType()==1)// apple
+			{
+				List<node_data> spa=ga.shortestPath(rob.getSrc(), wantedFruit.getSrc());
+				spa.remove(0);
+				spa.add(gr.getNode(wantedFruit.getDest()));//**
+				wantedFruit.setWithRobot(1);
+				rob.setPath(spa);
+			}
+			else //banana
+			{
+				List<node_data> spa=ga.shortestPath(rob.getSrc(), wantedFruit.getDest());
+				spa.remove(0);
+				spa.add(gr.getNode(wantedFruit.getSrc()));//**
+				wantedFruit.setWithRobot(1);
+				rob.setPath(spa);
+			}
+
+		}
+		for(node_robot rob: robots)
+		{
+			while(rob.getPath().size()>0)
+			{
+				game.chooseNextEdge(rob.getId(), rob.getPath().get(0).getKey());
+				game.move();
+				rob.getPath().remove(0);
+			}
+		}
+		List<String> currF = game.getFruits();
+		fruits.clear();
+		for (String string : currF) 
+		{
+			initFruit(string);
+		}
+		smartPosition();
+		List<String> currR = game.getRobots();
+		robots.clear();
+		for (String str : currR) 
+		{
+			initRobots(str);
+		}
+		paint();
+
+	}
 	public void automatic() throws JSONException {
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
@@ -460,7 +548,7 @@ public class MyGameGui
 		gg.init(g); // add graph
 		String infoGame = game.toString();
 		System.out.println(infoGame);
-		
+
 		DF(); //defoult this.Fruits
 		for(String f:game.getFruits()) // add fruits
 		{
@@ -486,91 +574,25 @@ public class MyGameGui
 			maxF--;
 		}
 
-		for(String r:game.getRobots()) // add fruits
+		for(String r:game.getRobots()) // add robots
 		{
 			initRobots(r); //read json robots and add to this.robots
 			System.out.println(r);
 		}
 		initGUI();
-		
-		//start manual game
+
+		//start auto game
+
 		game.startGame();
-		node_data selRob=null; // default selected robot
 		while(game.isRunning())
 		{
-			//update robots and fruits
-			long t = game.timeToEnd();
-//			System.out.println("Time to end: "+t/1000);
-//			DR();
-			List<String> currR = game.getRobots();
-			robots.clear();
-			for (String str : currR) 
-			{
-				initRobots(str);
-			}
-			if(selRob!=null)
-			{
-				for (node_data Currrob : robots)
-				{
-					selRob.setLocation(Currrob.getLocation());
-				}
-			}
-//			DF();
-			List<String> currF = game.getFruits();
-			fruits.clear();
-			for (String string : currF) 
-			{
-				initFruit(string);
-			}
-			paint();
-			
-			
-			//check robot move by clicks
-			Point3D CurrClick = new Point3D(this.x, this.y);
-
-			if(!RobotClicked)
-			{
-				for(node_data rob : robots) 
-				{
-
-					Point3D robPos = rob.getLocation(); 
-					//					System.out.println(robPos);
-					//System.err.println(CurrClick);
-					if(robPos.distance2D(CurrClick) <= clickEPS) // distance between click to robot
-					{
-						selRob = rob;
-						RobotClicked = true;
-						System.out.println("Rob selceted");
-						System.out.println(selRob.getLocation());
-						this.x=0;
-						this.y=0;
-						break;
-					}
-				}
-			}
-			else {
-				Collection<node_data> nd = gr.getV();
-				//				Point3D CurrClick = new Point3D(this.x, this.y);
-				for (node_data v : nd) 
-				{
-					Point3D currNode = v.getLocation();
-					if(currNode.distance2D(CurrClick) <= clickEPS)//distance between click to vertex
-					{
-						game.chooseNextEdge(selRob.getKey(), v.getKey());
-						RobotClicked = false;
-						this.x=0;
-						this.y=0;
-						break;
-					}
-				}
-			}
-			game.move(); // move the robot to requested location
-			paint();
+			moveAuto(game);
 		}
-		System.out.println(game.toString());
+
+		JFrame go= new JFrame(); // window to game over
+		JOptionPane.showMessageDialog(go, "Game Over");
 		game.stopGame();
-		//			System.out.println("Time to end: "+t/1000);
+		fruits.clear();
+		robots.clear();
 	}
-
-
 }
