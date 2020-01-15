@@ -68,6 +68,7 @@ public class MyGameGui
 		this.gr = g;
 		initGUI();
 	}
+	
 	public void setXY(double x,double y)
 	{
 		this.x=x;
@@ -181,6 +182,7 @@ public class MyGameGui
 		return r;
 	}
 
+	//	game_service gamePaint=null;
 	public void paint()
 	{	
 		StdDraw.clear();
@@ -211,17 +213,21 @@ public class MyGameGui
 					double w=Math.floor(ed.getWeight()*100)/100; // just 2 number after the point
 					StdDraw.text(xlll,ylll+(maxy-miny)*0.03,Double.toString(w));
 					StdDraw.setPenColor(Color.RED);
+					//										long t = gamePaint.timeToEnd();
+					//										StdDraw.setPenColor(Color.BLACK);
+					//										StdDraw.text(xlll,ylll,"Time to end: "+Double.toString(t/1000));
 				}
 			}
 
 			if(robots!=null) // paint robots
 			{
 				int i =robots.size();
-				Color arr []= {Color.ORANGE,Color.DARK_GRAY,Color.MAGENTA,Color.LIGHT_GRAY,Color.CYAN}; // arr for robots color, max robots=5
+				//				Color arr []= {Color.ORANGE,Color.DARK_GRAY,Color.MAGENTA,Color.LIGHT_GRAY,Color.CYAN}; // arr for robots color, max robots=5
 				for(node_robot r:robots)
 				{
-					StdDraw.setPenColor(arr[i]);
-					StdDraw.filledCircle(r.getLocation().x(),r.getLocation().y(),(maxx-minx)*0.010);
+					StdDraw.picture(r.getLocation().x(),r.getLocation().y(),"mouse.png",(maxx-minx)*0.045,(maxy-miny)*0.045);
+					//					StdDraw.setPenColor(arr[i]);
+					//					StdDraw.filledCircle(r.getLocation().x(),r.getLocation().y(),(maxx-minx)*0.010);
 					i--;
 				}
 			}
@@ -229,15 +235,17 @@ public class MyGameGui
 			{
 				for(node_fruit f:fruits)
 				{
-					if(f.getType()==1) // apple
+					if(f.getType()==1) // apple (cookie)
 					{
 						StdDraw.setPenColor(Color.PINK);
-						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
+						StdDraw.picture(f.getLocation().x(),f.getLocation().y(),"cookie.png",(maxx-minx)*0.035,(maxy-miny)*0.035);
+						//						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
 					}
-					if(f.getType()==-1) // banana
+					if(f.getType()==-1) // banana (cheese)
 					{
 						StdDraw.setPenColor(Color.YELLOW);
-						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
+						StdDraw.picture(f.getLocation().x(),f.getLocation().y(),"cheese.png",(maxx-minx)*0.035,(maxy-miny)*0.035);
+						//						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
 					}
 				}
 			}
@@ -258,7 +266,10 @@ public class MyGameGui
 	{
 		return Allreadydone;
 	}
-
+/*
+ * smartPosition- position the robots in a smart place
+ * and also connecting between fruit to edge
+ */
 	public void smartPosition ()
 	{
 		for(node_data v: gr.getV())
@@ -295,8 +306,8 @@ public class MyGameGui
 							gr.getNode(e.getDest()).setTag(++bv);
 							e.setTag(++ae);
 						}
-						f.setSrc(e.getSrc());
-						f.setDest(e.getDest());
+						f.setSrc(e.getSrc()); // set source of fruit
+						f.setDest(e.getDest()); // set dest of fruit
 
 					}
 				}
@@ -338,14 +349,14 @@ public class MyGameGui
 		DGraph gg = new DGraph();
 		gg.init(g); // add graph
 		String infoGame = game.toString();
-//		System.out.println(infoGame);
+		//		System.out.println(infoGame);
 
 
 		DF(); //defoult this.Fruits
 		for(String f:game.getFruits()) // add fruits
 		{
 			initFruit(f); //read json fruit and add to this.Fruits
-			System.out.println(f);
+			//			System.out.println(f);
 		}
 
 		DR(); //defoult this.Fruits
@@ -369,20 +380,24 @@ public class MyGameGui
 		for(String r:game.getRobots()) // add fruits
 		{
 			initRobots(r); //read json robots and add to this.robots
-			System.out.println(r);
+			//			System.out.println(r);
 		}
 		initGUI();
 		JFrame s= new JFrame(); // window to start game
-		JOptionPane.showMessageDialog(s, "To start playing click ~ok~, select a robot to start moving ");
+
+		JOptionPane.showMessageDialog(s, "To start playing click ok, select a robot to start moving ");
 		//start manual game
 		game.startGame();
 		node_robot selRob=null; // default selected robot
 		while(game.isRunning())
 		{
+			//			gamePaint=game;
+
+
+			//			paint();
+			//			System.out.println("Time to end: "+t/1000);
+
 			//update robots and fruits
-			long t = game.timeToEnd();
-			System.out.println("Time to end: "+t/1000);
-			//			DR();
 			List<String> currR = game.getRobots();
 			robots.clear();
 			for (String str : currR) 
@@ -396,7 +411,6 @@ public class MyGameGui
 					selRob.setLocation(Currrob.getLocation());
 				}
 			}
-			//			DF();
 			List<String> currF = game.getFruits();
 			fruits.clear();
 			for (String string : currF) 
@@ -404,7 +418,6 @@ public class MyGameGui
 				initFruit(string);
 			}
 			paint();
-
 
 			//check robot move by clicks
 			Point3D CurrClick = new Point3D(this.x, this.y);
@@ -415,7 +428,7 @@ public class MyGameGui
 				{
 
 					Point3D robPos = rob.getLocation(); 
-					//					System.out.println(robPos);
+					//System.out.println(robPos);
 					//System.err.println(CurrClick);
 					if(robPos.distance2D(CurrClick) <= clickEPS) // distance between click to robot
 					{
@@ -430,7 +443,6 @@ public class MyGameGui
 			}
 			else {
 				Collection<node_data> nd = gr.getV();
-				//				Point3D CurrClick = new Point3D(this.x, this.y);
 				for (node_data v : nd) 
 				{
 					Point3D currNode = v.getLocation();
@@ -448,20 +460,21 @@ public class MyGameGui
 			game.move(); // move the robot to requested location
 			paint();
 		}
-		System.out.println(game.toString());
+		//		System.out.println(game.toString());
 		JFrame go= new JFrame(); // window to game over
 		JOptionPane.showMessageDialog(go, "Game Over");
 		game.stopGame();
 		fruits.clear();
 		robots.clear();
-		//			System.out.println("Time to end: "+t/1000);
 	}
 
 
-/*
- * function to automat game
- */
+	/*
+	 * function to automat game
+	 */
 	private void moveAuto(game_service game) throws JSONException {
+		long t = game.timeToEnd();
+		System.out.println("Time to end: "+t/1000);
 		Graph_Algo ga=new Graph_Algo();
 		ga.init(gr);
 		node_fruit wantedFruit=new NodeFruit();
@@ -553,9 +566,8 @@ public class MyGameGui
 		for(String f:game.getFruits()) // add fruits
 		{
 			initFruit(f); //read json fruit and add to this.Fruits
-			System.out.println(f);
+			//			System.out.println(f);
 		}
-
 		DR(); //defoult this.Fruits
 		this.gr=gg;
 		smartPosition (); // smart start position of robots
@@ -577,7 +589,7 @@ public class MyGameGui
 		for(String r:game.getRobots()) // add robots
 		{
 			initRobots(r); //read json robots and add to this.robots
-			System.out.println(r);
+			//			System.out.println(r);
 		}
 		initGUI();
 
@@ -588,7 +600,6 @@ public class MyGameGui
 		{
 			moveAuto(game);
 		}
-
 		JFrame go= new JFrame(); // window to game over
 		JOptionPane.showMessageDialog(go, "Game Over");
 		game.stopGame();

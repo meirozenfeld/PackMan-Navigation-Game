@@ -90,9 +90,11 @@ import javax.swing.KeyStroke;
 
 import org.json.JSONException;
 
+
 import MyAlgorithms.Graph_Algo;
 import MydataStructure.DGraph;
 import MydataStructure.NodeData;
+import MyAlgorithms.graph_algorithms;
 import dataStructure.graph;
 import dataStructure.node_data;
 import gameClient.MyGameGui;
@@ -747,19 +749,19 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 //		JMenuItem stopGame = new JMenuItem("Stop game");
 		manualGame.addActionListener(std);
 		autoGame.addActionListener(std);
-
 		menu.add(manualGame);
 		menu.add(autoGame);
+		
 //		menu.add(stopGame);
-		//		///
-		//		JMenu menu2 = new JMenu("File");
-		//		menuBar.add(menu2);
-		//		JMenuItem menuItem2 = new JMenuItem("save");
-		//		menuItem2.addActionListener(std);
-		//		menu2.add(menuItem2);
-		//		JMenuItem menuItem4 = new JMenuItem("load");
-		//		menuItem4.addActionListener(std);
-		//		menu2.add(menuItem4);
+				///
+				JMenu menu2 = new JMenu("File");
+				menuBar.add(menu2);
+				JMenuItem menuItem2 = new JMenuItem("save");
+				menuItem2.addActionListener(std);
+				menu2.add(menuItem2);
+				JMenuItem menuItem4 = new JMenuItem("load");
+				menuItem4.addActionListener(std);
+				menu2.add(menuItem4);
 		// JMenuItem menuItem5 = new JMenuItem("shortest Path");
 		// menuItem5.addActionListener(std);
 		// menu2.add(menuItem5);
@@ -1749,7 +1751,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	/**
 	 * This method cannot be called directly.
 	 */
-
+ private graph gr; // graph fo save and init
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -1771,6 +1773,33 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		
 			break;
+//		case "save":
+//			graph_algorithms gSave=new Graph_Algo();
+//			gSave.init(GG);
+//			FileDialog sa=new FileDialog(StdDraw.frame,"save .txt",FileDialog.SAVE);
+//			sa.setVisible(true);
+//			String file=null;
+//			file=sa.getFile();
+//			gSave.save(sa.getDirectory()+file+".txt");
+//			break;
+//		case "init":
+//			graph_algorithms gInit=new Graph_Algo();
+//			JFrame.setDefaultLookAndFeelDecorated(true);
+//			JDialog.setDefaultLookAndFeelDecorated(true);
+//			JFrame frame = new JFrame("JComboBox Test");
+//			frame.setLayout(new FlowLayout());
+//			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			JFileChooser chooser = new JFileChooser();
+//			int returnValue = chooser.showOpenDialog(null);
+//			if (returnValue == JFileChooser.APPROVE_OPTION) 
+//			{
+//				File selected = chooser.getSelectedFile();
+//				gInit.init(selected.getPath());
+//				gr = gInit.copy();
+//				GG.paint();
+//			}
+//			frame.pack();
+//			break;
 		default : 
 		}
 
