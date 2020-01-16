@@ -41,6 +41,7 @@ import Server.game_service;
 public class MyGameGui 
 {
 	graph gr;
+	Logger_KML kml;
 	static boolean Allreadydone = false;
 	private final double EPS=0.000001;
 	private final double clickEPS=0.00051;
@@ -53,6 +54,9 @@ public class MyGameGui
 	double x; // x of click
 	double y; // y of click
 	boolean RobotClicked = false; // if robot clicked or not (for manual game)
+	long t1;
+	private double score;
+	private int numRob;
 
 	public MyGameGui()
 	{
@@ -68,7 +72,7 @@ public class MyGameGui
 		this.gr = g;
 		initGUI();
 	}
-	
+
 	public void setXY(double x,double y)
 	{
 		this.x=x;
@@ -169,20 +173,20 @@ public class MyGameGui
 		}
 	}
 
-	public int initInfoGame(String i) throws JSONException
+	public void initInfoGame(String info) throws JSONException //pdate num of robots and score
 	{
-		int r=0;
-		JSONObject jo = new JSONObject(i);
+		JSONObject jo = new JSONObject(info);
 		try {
 			JSONObject ro=jo.getJSONObject("GameServer");
-			r = ro.getInt("robots");
+			numRob = ro.getInt("robots");
+			score=ro.getDouble("grade");
 		} catch(Exception e){
 			e.printStackTrace();
 		}
-		return r;
+
 	}
 
-	//	game_service gamePaint=null;
+	//	game_service gamePaint;
 	public void paint()
 	{	
 		StdDraw.clear();
@@ -192,6 +196,8 @@ public class MyGameGui
 				StdDraw.setPenColor(Color.BLACK);
 				StdDraw.filledCircle(v.getLocation().x(),v.getLocation().y(),(maxx-minx)*0.005);
 				StdDraw.text( v.getLocation().x(), v.getLocation().y()+(maxy-miny)*0.04,Integer.toString(v.getKey()));
+				StdDraw.text(maxx-0.0009,maxy,"Time: "+Double.toString(t1/1000));//draw the time to end
+				StdDraw.text(maxx-0.0009,maxy-0.00025,"Score: "+Double.toString(score));//draw the score of game
 				Collection<edge_data> e=gr.getE(v.getKey());
 				StdDraw.setPenColor(Color.RED);
 				for(edge_data ed: e) // paint edges
@@ -213,22 +219,21 @@ public class MyGameGui
 					double w=Math.floor(ed.getWeight()*100)/100; // just 2 number after the point
 					StdDraw.text(xlll,ylll+(maxy-miny)*0.03,Double.toString(w));
 					StdDraw.setPenColor(Color.RED);
-					//										long t = gamePaint.timeToEnd();
-					//										StdDraw.setPenColor(Color.BLACK);
-					//										StdDraw.text(xlll,ylll,"Time to end: "+Double.toString(t/1000));
+
+
 				}
 			}
 
 			if(robots!=null) // paint robots
 			{
-				int i =robots.size();
+				//				int i =robots.size();
 				//				Color arr []= {Color.ORANGE,Color.DARK_GRAY,Color.MAGENTA,Color.LIGHT_GRAY,Color.CYAN}; // arr for robots color, max robots=5
 				for(node_robot r:robots)
 				{
 					StdDraw.picture(r.getLocation().x(),r.getLocation().y(),"mouse.png",(maxx-minx)*0.045,(maxy-miny)*0.045);
 					//					StdDraw.setPenColor(arr[i]);
 					//					StdDraw.filledCircle(r.getLocation().x(),r.getLocation().y(),(maxx-minx)*0.010);
-					i--;
+					//					i--;
 				}
 			}
 			if(fruits!=null) // paint fruits
@@ -243,6 +248,7 @@ public class MyGameGui
 					}
 					if(f.getType()==-1) // banana (cheese)
 					{
+
 						StdDraw.setPenColor(Color.YELLOW);
 						StdDraw.picture(f.getLocation().x(),f.getLocation().y(),"cheese.png",(maxx-minx)*0.035,(maxy-miny)*0.035);
 						//						StdDraw.filledCircle(f.getLocation().x(),f.getLocation().y(),(maxx-minx)*0.005);
@@ -252,6 +258,7 @@ public class MyGameGui
 
 
 		}
+
 		StdDraw.show();
 	}
 	public void setG(graph g)
@@ -266,10 +273,10 @@ public class MyGameGui
 	{
 		return Allreadydone;
 	}
-/*
- * smartPosition- position the robots in a smart place
- * and also connecting between fruit to edge
- */
+	/*
+	 * smartPosition- position the robots in a smart place
+	 * and also connecting between fruit to edge
+	 */
 	public void smartPosition ()
 	{
 		for(node_data v: gr.getV())
@@ -326,20 +333,7 @@ public class MyGameGui
 			}
 		}
 	}
-
-	private static int nextNode(graph g, int src)
-	{
-		int ans = -1;
-		Collection<edge_data> ee = g.getE(src);
-		Iterator<edge_data> itr = ee.iterator();
-		int s = ee.size();
-		int r = (int)(Math.random()*s);
-		int i=0;
-		while(i<r) {itr.next();i++;}
-		ans = itr.next().getDest();
-		return ans;
-	}
-
+	
 	public void manual() throws JSONException {
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
@@ -362,16 +356,16 @@ public class MyGameGui
 		DR(); //defoult this.Fruits
 		this.gr=gg;
 		smartPosition (); // smart start position of robots
-		int rt=initInfoGame(infoGame); // how many robots in the game
+		initInfoGame(infoGame); // how many robots in the game
 		int maxF=fruits.size();  
 		while(maxF>0) // loop to position on the edge with the most fruits
 		{
 			for(node_data v: gr.getV())
 			{
-				if(rt>0&&v.getTag()==maxF)
+				if(numRob>0&&v.getTag()==maxF)
 				{
 					game.addRobot(v.getKey());
-					rt--;
+					numRob--;
 				}
 			}
 			maxF--;
@@ -385,19 +379,13 @@ public class MyGameGui
 		initGUI();
 		JFrame s= new JFrame(); // window to start game
 
-		JOptionPane.showMessageDialog(s, "To start playing click ok, select a robot to start moving ");
+		JOptionPane.showMessageDialog(s, "To start playing click ok, select a mouse to start moving ");
 		//start manual game
 		game.startGame();
 		node_robot selRob=null; // default selected robot
 		while(game.isRunning())
 		{
-			//			gamePaint=game;
-
-
-			//			paint();
-			//			System.out.println("Time to end: "+t/1000);
-
-			//update robots and fruits
+			t1 = game.timeToEnd();
 			List<String> currR = game.getRobots();
 			robots.clear();
 			for (String str : currR) 
@@ -458,11 +446,15 @@ public class MyGameGui
 				}
 			}
 			game.move(); // move the robot to requested location
+			infoGame = game.toString();
+			initInfoGame(infoGame);
 			paint();
 		}
-		//		System.out.println(game.toString());
+		System.out.println(game.toString());
+		infoGame = game.toString();
+		initInfoGame(infoGame);
 		JFrame go= new JFrame(); // window to game over
-		JOptionPane.showMessageDialog(go, "Game Over");
+		JOptionPane.showMessageDialog(go, "Game Over! your score is: "+score);
 		game.stopGame();
 		fruits.clear();
 		robots.clear();
@@ -470,11 +462,14 @@ public class MyGameGui
 
 
 	/*
-	 * function to automat game
+	 * function to automatic game
 	 */
 	private void moveAuto(game_service game) throws JSONException {
-		long t = game.timeToEnd();
-		System.out.println("Time to end: "+t/1000);
+
+		t1 = game.timeToEnd(); // update time
+		String infoGame = game.toString();
+		initInfoGame(infoGame); //update score
+		//		System.out.println("Time to end: "+t1/1000);
 		Graph_Algo ga=new Graph_Algo();
 		ga.init(gr);
 		node_fruit wantedFruit=new NodeFruit();
@@ -519,7 +514,7 @@ public class MyGameGui
 			else //banana
 			{
 				List<node_data> spa=ga.shortestPath(rob.getSrc(), wantedFruit.getDest());
-				spa.remove(0);
+				spa.remove(0); // remove the start vertex himself
 				spa.add(gr.getNode(wantedFruit.getSrc()));//**
 				wantedFruit.setWithRobot(1);
 				rob.setPath(spa);
@@ -531,10 +526,11 @@ public class MyGameGui
 			while(rob.getPath().size()>0)
 			{
 				game.chooseNextEdge(rob.getId(), rob.getPath().get(0).getKey());
-				game.move();
 				rob.getPath().remove(0);
 			}
 		}
+
+		game.move();
 		List<String> currF = game.getFruits();
 		fruits.clear();
 		for (String string : currF) 
@@ -551,7 +547,8 @@ public class MyGameGui
 		paint();
 
 	}
-	public void automatic() throws JSONException {
+	Thread t;
+	public void automatic() throws JSONException, InterruptedException {
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
 		String i = JOptionPane.showInputDialog(sen,"Choose senario game between 0-23");
@@ -562,25 +559,32 @@ public class MyGameGui
 		String infoGame = game.toString();
 		System.out.println(infoGame);
 
+		this.kml=new Logger_KML(); // default this.kml 
+		this.gr=gg;
+		kml.setGraph(gr); // set graph for kml
+		kml.setName(i); // set name file kml by senario
+		kml.buildGraph(); // set all vertexs and edges
+
 		DF(); //defoult this.Fruits
 		for(String f:game.getFruits()) // add fruits
 		{
 			initFruit(f); //read json fruit and add to this.Fruits
 			//			System.out.println(f);
 		}
-		DR(); //defoult this.Fruits
-		this.gr=gg;
+		kml.setFruits(fruits);
+		DR(); //default this.robots
+	
 		smartPosition (); // smart start position of robots
-		int rt=initInfoGame(infoGame); // how many robots in the game
+		initInfoGame(infoGame); // how many robots in the game
 		int maxF=fruits.size();  
 		while(maxF>0) // loop to position on the edge with the most fruits
 		{
 			for(node_data v: gr.getV())
 			{
-				if(rt>0&&v.getTag()==maxF)
+				if(numRob>0&&v.getTag()==maxF)
 				{
 					game.addRobot(v.getKey());
-					rt--;
+					numRob--;
 				}
 			}
 			maxF--;
@@ -592,16 +596,41 @@ public class MyGameGui
 			//			System.out.println(r);
 		}
 		initGUI();
-
+		kml.setRobots(robots);
 		//start auto game
-
 		game.startGame();
+//		long tHelp=game.timeToEnd();
 		while(game.isRunning())
-		{
+		{ 
 			moveAuto(game);
+//			if(tHelp>game.timeToEnd())
+//			{
+//				kml.setRobots(robots);
+//				kml.setFruits(fruits);
+//				tHelp-=20;
+//			}
+			//			t=new Thread(new Runnable() {    Thread to Ex4_OOP (less move)
+			//				@Override
+			//				public void run() {
+			//					try {
+			//			moveAuto(game);
+			//					} catch (JSONException e) {
+			//						e.printStackTrace();
+			//					}
+			//				}
+			//			});
+			//			t.start();
+			//			Thread.sleep(100);
+			//			game.move();
 		}
-		JFrame go= new JFrame(); // window to game over
-		JOptionPane.showMessageDialog(go, "Game Over");
+
+		kml.finalText(); // close the kml text
+		kml.saveKml(); // save kml file
+		System.out.println(game.toString());
+		infoGame = game.toString();
+		initInfoGame(infoGame);
+		JFrame go= new JFrame(); // window to game over and score
+		JOptionPane.showMessageDialog(go, "Game Over! your score is: "+score);
 		game.stopGame();
 		fruits.clear();
 		robots.clear();

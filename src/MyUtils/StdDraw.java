@@ -94,9 +94,10 @@ import org.json.JSONException;
 import MyAlgorithms.Graph_Algo;
 import MydataStructure.DGraph;
 import MydataStructure.NodeData;
+import MydataStructure.graph;
 import MyAlgorithms.graph_algorithms;
-import dataStructure.graph;
-import dataStructure.node_data;
+
+import oop_dataStructure.*;
 import gameClient.MyGameGui;
 
 /**
@@ -1715,6 +1716,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				{
 				GG.manual();
 				tm.interrupt();
+				
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -1722,6 +1724,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		});
 		tm.start();
+		
 	}
 	
 	/*
@@ -1744,6 +1747,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				}
 			}
 		});
+	
 		ta.start();
 	}
 	
@@ -1768,6 +1772,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		case "Automatic game":
 			try {
 				autoThread();
+				
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
