@@ -36,7 +36,13 @@ public class Logger_KML {
 		this.game=g;
 		this.t=game.timeToEnd();
 	}
-	public void setFruits(ArrayList<node_fruit> fruits)
+	/**
+	 * 
+	 * @param fruits - list of fruits
+	 * @param now - start time for google map
+	 * @param after - end time for google map
+	 */
+	public void setFruits(ArrayList<node_fruit> fruits,String now,String after)
 	{
 		this.fruits=fruits;
 		for(node_fruit f: this.fruits)
@@ -83,7 +89,7 @@ public class Logger_KML {
 					"		</ListStyle>\r\n" + 
 					"	</Style>\r\n" + 
 					"	<Placemark>\r\n" + 
-					"		<name>banana</name>\r\n" + 
+					"		<name></name>\r\n" + 
 					"		<LookAt>\r\n" + 
 					"			<longitude>35.20024537475233</longitude>\r\n" + 
 					"			<latitude>32.10484153064817</latitude>\r\n" + 
@@ -93,9 +99,10 @@ public class Logger_KML {
 					"			<range>2813.773629704574</range>\r\n" + 
 					"			<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>\r\n" + 
 					"		</LookAt>\r\n" + 
-//					"   <gx:TimeStamp>\r\n" + 
-//					"          <when>"+t+"</when>\r\n" + 
-//					"        </gx:TimeStamp>"+
+					"        <TimeSpan>\r\n" + 
+					"          <begin>"+now+"</begin>\r\n" + 
+					"          <end>"+after+"</end>\r\n" + 
+					"        </TimeSpan>\r\n"+
 					"		<styleUrl>#msn_dollar</styleUrl>\r\n" + 
 					"		<Point>\r\n" + 
 					"			<gx:drawOrder>1</gx:drawOrder>\r\n" + 
@@ -156,9 +163,10 @@ public class Logger_KML {
 						"			<range>2560.605395589177</range>\r\n" + 
 						"			<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>\r\n" + 
 						"		</LookAt>\r\n" +
-//						"   <gx:TimeStamp>\r\n" + 
-//						"          <when>"+t+"</when>\r\n" + 
-//						"        </gx:TimeStamp>"+
+						"        <TimeSpan>\r\n" + 
+						"          <begin>"+now+"</begin>\r\n" + 
+						"          <end>"+after+"</end>\r\n" + 
+						"        </TimeSpan>\r\n"+
 						"		<styleUrl>#msn_euro</styleUrl>\r\n" + 
 						"		<Point>\r\n" + 
 						"			<gx:drawOrder>1</gx:drawOrder>\r\n" + 
@@ -168,11 +176,19 @@ public class Logger_KML {
 			}
 		}
 	}
-	public void setRobots(ArrayList<node_robot> robots)
+	
+	/**
+	 * 
+	 * @param robots - list of robots
+	 * @param now - start time for google map
+	 * @param after - end time for google map
+	 */
+	public void setRobots(ArrayList<node_robot> robots,String now,String after)
 	{
 		this.robots=robots;
 		for(node_robot r:this.robots)
 		{
+			
 			str+="<name>iconRob.kml</name>\r\n" + 
 					"	<StyleMap id=\"m_ylw-pushpin\">\r\n" + 
 					"		<Pair>\r\n" + 
@@ -219,9 +235,10 @@ public class Logger_KML {
 					"			<range>5857.957528229067</range>\r\n" + 
 					"			<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>\r\n" + 
 					"		</LookAt>\r\n" +
-//					"   <gx:TimeStamp>\r\n" + 
-//					"          <when>"+t+"</when>\r\n" + 
-//					"        </gx:TimeStamp>"+
+					"        <TimeSpan>\r\n" + 
+					"          <begin>"+now+"</begin>\r\n" + 
+					"          <end>"+after+"</end>\r\n" + 
+					"        </TimeSpan>\r\n"+
 					"		<styleUrl>#m_ylw-pushpin</styleUrl>\r\n" + 
 					"		<Point>\r\n" + 
 					"			<gx:drawOrder>1</gx:drawOrder>\r\n" + 
@@ -231,6 +248,10 @@ public class Logger_KML {
 					"";
 		}
 	}
+	/**
+	 * 
+	 * @param g - graph from MyGameGui
+	 */
 	public void setGraph (graph g) 
 	{
 		this.gr=g;
@@ -239,48 +260,20 @@ public class Logger_KML {
 				"<Document>\r\n" + 
 				"";
 	}
+	
+	/**
+	 * 
+	 * @param i - senario for save the name kmlFile
+	 */
 	public void setName(String i)
 	{
 		fileName=i+".kml";
 		str+="<name>"+fileName+"</name>";
-//		str+="<Style id=\"sh_lodging\">\r\n" + 
-//				"		<IconStyle>\r\n" + 
-//				"			<scale>1.4</scale>\r\n" + 
-//				"			<Icon>\r\n" + 
-//				"				<href>http://maps.google.com/mapfiles/kml/shapes/lodging.png</href>\r\n" + 
-//				"			</Icon>\r\n" + 
-//				"			<hotSpot x=\"0.5\" y=\"0\" xunits=\"fraction\" yunits=\"fraction\"/>\r\n" + 
-//				"		</IconStyle>\r\n" + 
-//				"		<BalloonStyle>\r\n" + 
-//				"		</BalloonStyle>\r\n" + 
-//				"		<ListStyle>\r\n" + 
-//				"		</ListStyle>\r\n" + 
-//				"	</Style>\r\n" + 
-//				"	<StyleMap id=\"msn_lodging\">\r\n" + 
-//				"		<Pair>\r\n" + 
-//				"			<key>normal</key>\r\n" + 
-//				"			<styleUrl>#sn_lodging</styleUrl>\r\n" + 
-//				"		</Pair>\r\n" + 
-//				"		<Pair>\r\n" + 
-//				"			<key>highlight</key>\r\n" + 
-//				"			<styleUrl>#sh_lodging</styleUrl>\r\n" + 
-//				"		</Pair>\r\n" + 
-//				"	</StyleMap>\r\n" + 
-//				"	<Style id=\"sn_lodging\">\r\n" + 
-//				"		<IconStyle>\r\n" + 
-//				"			<scale>1.2</scale>\r\n" + 
-//				"			<Icon>\r\n" + 
-//				"				<href>http://maps.google.com/mapfiles/kml/shapes/lodging.png</href>\r\n" + 
-//				"			</Icon>\r\n" + 
-//				"			<hotSpot x=\"0.5\" y=\"0\" xunits=\"fraction\" yunits=\"fraction\"/>\r\n" + 
-//				"		</IconStyle>\r\n" + 
-//				"		<BalloonStyle>\r\n" + 
-//				"		</BalloonStyle>\r\n" + 
-//				"		<ListStyle>\r\n" + 
-//				"		</ListStyle>\r\n" + 
-//				"	</Style>\r\n" + 
-//				"";
 	}
+	
+	/**
+	 *  build graph by vertex and edges
+	 */
 	public void buildGraph ()
 	{
 		for(node_data v: gr.getV())
@@ -371,24 +364,27 @@ public class Logger_KML {
 			}
 		}
 	}
+	/**
+	 * end of string 
+	 */
 	public void finalText ()
 	{
 		str+="</Document>\r\n" + 
 				"</kml>\r\n" + 
 				"";
 	}
+	/**
+	 * save kml file
+	 */
 	public void saveKml()
 	{
 		try {
-			file = new FileWriter(fileName);
+			file = new FileWriter("data/"+fileName);
 			file.write(this.str);
 			file.close();
 		} catch (RuntimeException | IOException e) {
 			e.printStackTrace();
 		}
-	}
-	public static void main(String[] args) {
-
 	}
 
 }

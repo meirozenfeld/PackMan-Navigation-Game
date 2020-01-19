@@ -1747,7 +1747,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				}
 			}
 		});
-	
+
 		ta.start();
 	}
 	
@@ -1772,7 +1772,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		case "Automatic game":
 			try {
 				autoThread();
-				
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}

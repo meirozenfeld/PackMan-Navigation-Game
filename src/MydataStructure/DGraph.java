@@ -71,10 +71,7 @@ public class DGraph implements graph, Serializable{
 		this.Edges.put(n, new Hashtable<Integer,edge_data>());
 		this.mc++;
 	}
-//	public void addFruit(node_data n) {
-//		int k=n.getKey();
-//		this.Fruits.put(k ,n);
-//	}
+	
 	@Override
 	public void connect(int src, int dest, double w) {
 		try {
