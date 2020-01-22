@@ -393,7 +393,7 @@ public class MyGameGui
 		this.gr=gg;
 		smartPosition (); // smart start position of robots
 		initInfoGame(infoGame); // how many robots in the game
-		int maxF=fruits.size();  
+		int maxF=fruits.size()+2000; 
 		while(maxF>0) // loop to position on the edge with the most fruits
 		{
 			for(node_data v: gr.getV())
@@ -401,6 +401,7 @@ public class MyGameGui
 				if(numRob>0&&v.getTag()==maxF)
 				{
 					game.addRobot(v.getKey());
+					v.setWeight(-4);
 					numRob--;
 				}
 			}
@@ -688,9 +689,9 @@ public class MyGameGui
 		gg.init(g); // add graph
 		String infoGame = game.toString();
 		System.out.println(infoGame);
-		
-		//		int id=311605315;
-		//		Game_Server.login(id); // connect server
+
+//		int id=311605315;// my id
+//		Game_Server.login(id); // connect server
 		this.kml=new Logger_KML(); // new kml
 		this.gr=gg;
 		kml.setGraph(gr); // set graph for kml
@@ -736,7 +737,10 @@ public class MyGameGui
 		int space=0;
 		while(game.isRunning())
 		{
-			moveAuto(game);
+			if(Integer.parseInt(i)!=5)// if not senario 5
+			{
+				moveAuto(game);
+			}
 			switch (Integer.parseInt(i)) 
 			{
 			case 0:
@@ -754,6 +758,7 @@ public class MyGameGui
 				tHelp=timeToMove(tHelp,game,space);
 				break;
 			case 5:
+				moveAutoFive(game);
 				space =118;
 				tHelp=timeToMove(tHelp,game,space);
 				break;
@@ -774,27 +779,21 @@ public class MyGameGui
 				tHelp=timeToMove(tHelp,game,space);
 				break;
 			case 19:
-
-
-
 				space =110;
 				if(tHelp<13000)
 				{
 					space=75;
 				}
-				System.out.println(space);
+				//				System.out.println(space);
 				tHelp=timeToMove(tHelp,game,space);
 				break;
 			case 23:
-
 				space =45;
 				tHelp=timeToMove(tHelp,game,space);
 				break;
 			default:
 				break;
 			} 
-
-
 		}	
 		//		kml.finalText(); // close the kml text
 		//		kml.saveKml(); // save kml file
@@ -809,7 +808,13 @@ public class MyGameGui
 		robots.clear();
 	}
 
-
+	/**
+	 * method for how many times call move order
+	 * @param tHelp
+	 * @param g = the game
+	 * @param space = space between call move
+	 * @return
+	 */
 	private long timeToMove(long tHelp, game_service g, int space) {
 		if(tHelp-g.timeToEnd()>space) // efficient formula to call move
 		{
@@ -825,13 +830,11 @@ public class MyGameGui
 	static int moveArr [] =new int [24];// requested move
 	static Hashtable<Integer, Integer> allGrade=new Hashtable<Integer, Integer>(); // key=id, value=senario (value not used)
 	static int myPlace []= new int [24]; // 
-/**
- * method for "Game server info" in menubar
- * get details from printLog() method
- * and draw them:
- * how many games played
- * my best score and my place by senario
- */
+	/**
+	 * method for "Game server info" in menubar
+	 * get details from printLog() method and draw them:
+	 * how many games played, my best score and my place by senario
+	 */
 	public void gameServerInfo() {
 		StdDraw.clear();
 		int y=0; // parameter to down line
@@ -913,12 +916,12 @@ public class MyGameGui
 						if(idLength==9)// length of id should be 9
 						{
 							allGrade.put(id, j);
-//							System.out.println("user id: "+resultSet2.getInt("userID") + " is score: " + resultSet2.getInt("score")+" senario: "+j);
+							//							System.out.println("user id: "+resultSet2.getInt("userID") + " is score: " + resultSet2.getInt("score")+" senario: "+j);
 						}
 					}
 				}
 				myPlace[j]+=allGrade.size(); // size of all who pass me in senario j
-//				System.out.println(myPlace[j]);
+				//				System.out.println(myPlace[j]);
 				allGrade.clear();
 			}
 			resultSet.close();
@@ -933,6 +936,99 @@ public class MyGameGui
 		catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+
+
+	/**
+	 * help method in isRunning loop to automatic game Senario 5 only - tricky senario
+	 **/
+	private void moveAutoFive(game_service game) throws JSONException {
+
+		t1 = game.timeToEnd(); // update time
+		String infoGame = game.toString();
+		initInfoGame(infoGame); //update score
+		//System.out.println("Time to end: "+t1/1000);
+		Graph_Algo ga=new Graph_Algo();
+		ga.init(gr);
+		node_fruit wantedFruit=new FruitData();
+		int maxVal=-1;
+		for(node_robot rob: robots)
+		{
+
+			double minDist=Double.MAX_VALUE; // veriable to shortest distance
+			for(node_fruit f: fruits)
+			{
+				if(f.getWithRobot()==0)
+				{
+					int tmp1=f.getValue();
+					if(f.getType()==1) //apple= src to dest
+					{
+						double tmp= ga.shortestPathDist(rob.getSrc(),f.getSrc());
+						tmp+= ga.shortestPathDist(f.getSrc(),f.getDest());
+						if(tmp<minDist&&tmp1>maxVal)
+						{
+							minDist=tmp;
+							wantedFruit=f;
+							maxVal=tmp1;
+						}
+					}
+					else // banana dest to src
+					{
+						double tmp= ga.shortestPathDist(rob.getSrc(),f.getDest());
+						tmp+= ga.shortestPathDist(f.getDest(),f.getSrc());
+
+						if(tmp<minDist&&tmp1>maxVal)
+						{
+							minDist=tmp;
+							wantedFruit=f;
+							maxVal=tmp1;
+						}
+					}
+				}
+			}
+			if(wantedFruit.getType()==1)// apple
+			{
+				List<node_data> spa=ga.shortestPath(rob.getSrc(), wantedFruit.getSrc());
+				spa.remove(0);
+				spa.add(gr.getNode(wantedFruit.getDest()));//**
+				wantedFruit.setWithRobot(1);
+				rob.setPath(spa);
+			}
+			else //banana
+			{
+				List<node_data> spa=ga.shortestPath(rob.getSrc(), wantedFruit.getDest());
+				spa.remove(0); // remove the start vertex himself
+				spa.add(gr.getNode(wantedFruit.getSrc()));//**
+				wantedFruit.setWithRobot(1);
+				rob.setPath(spa);
+			}
+
+		}
+		for(node_robot rob: robots)
+		{
+			while(rob.getPath().size()>0)
+			{
+				game.chooseNextEdge(rob.getId(), rob.getPath().get(0).getKey());
+				rob.getPath().remove(0);
+			}
+		}
+
+
+		List<String> currF = game.getFruits();
+		fruits.clear();
+		for (String string : currF) 
+		{
+			initFruit(string);
+		}
+		smartPosition();
+		List<String> currR = game.getRobots();
+		robots.clear();
+		for (String str : currR) 
+		{
+			initRobots(str);
+		}
+		paint();
 
 	}
+
 }

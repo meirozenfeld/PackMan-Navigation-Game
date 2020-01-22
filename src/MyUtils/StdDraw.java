@@ -1783,34 +1783,8 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			
 			GG.gameServerInfo();
 			break;
-//		case "save":
-//			graph_algorithms gSave=new Graph_Algo();
-//			gSave.init(GG);
-//			FileDialog sa=new FileDialog(StdDraw.frame,"save .txt",FileDialog.SAVE);
-//			sa.setVisible(true);
-//			String file=null;
-//			file=sa.getFile();
-//			gSave.save(sa.getDirectory()+file+".txt");
-//			break;
-//		case "init":
-//			graph_algorithms gInit=new Graph_Algo();
-//			JFrame.setDefaultLookAndFeelDecorated(true);
-//			JDialog.setDefaultLookAndFeelDecorated(true);
-//			JFrame frame = new JFrame("JComboBox Test");
-//			frame.setLayout(new FlowLayout());
-//			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//			JFileChooser chooser = new JFileChooser();
-//			int returnValue = chooser.showOpenDialog(null);
-//			if (returnValue == JFileChooser.APPROVE_OPTION) 
-//			{
-//				File selected = chooser.getSelectedFile();
-//				gInit.init(selected.getPath());
-//				gr = gInit.copy();
-//				GG.paint();
-//			}
-//			frame.pack();
-//			break;
-		default : 
+		default :
+			break;
 		}
 
 	}
