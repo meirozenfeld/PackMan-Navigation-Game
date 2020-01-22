@@ -16,6 +16,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -63,10 +68,10 @@ public class MyGameGui
 
 	public MyGameGui()
 	{
-		gr = new DGraph();
+		gr =null;
 		fruits= new ArrayList<node_fruit>();
 		robots= new ArrayList<node_robot>();
-//		this.kml=new Logger_KML();
+		//		this.kml=new Logger_KML();
 
 		initGUI();
 	}
@@ -99,16 +104,25 @@ public class MyGameGui
 	{
 		robots=new ArrayList<node_robot>();
 	}
-	
+
 	/**
 	 * order the window scale
 	 */
 	private void initGUI()
 	{
-		minx = Integer.MAX_VALUE;
-		miny = Integer.MAX_VALUE;
-		maxx = Integer.MIN_VALUE;
-		maxy = Integer.MIN_VALUE;
+		if (gr != null ) {
+			minx = Integer.MAX_VALUE;
+			miny = Integer.MAX_VALUE;
+			maxx = Integer.MIN_VALUE;
+			maxy = Integer.MIN_VALUE;
+		}
+		else //scale for Game server info
+		{
+			minx = 0;
+			miny = 0;
+			maxx = 800;
+			maxy = 700;
+		}
 		if(!getAllready())
 		{
 			StdDraw.setCanvasSize(800, 700);
@@ -157,11 +171,11 @@ public class MyGameGui
 		JSONObject jo = new JSONObject(f);
 		try {
 			JSONObject fr=jo.getJSONObject("Fruit");
-			double value= fr.getDouble("value");
+			int value= fr.getInt("value");
 			int type = fr.getInt("type");
 			String pos=fr.getString("pos");
 			Point3D p=new Point3D(pos);
-			node_fruit v=new FruitData(p, type);
+			node_fruit v=new FruitData(p, type,value);
 			v.setWithRobot(0);
 			this.fruits.add(v);
 		} catch(Exception e){
@@ -186,6 +200,7 @@ public class MyGameGui
 			String pos=ro.getString("pos");
 			Point3D p=new Point3D(pos);
 			node_robot v=new RobotData(id,src,p);
+			v.setOnTheWay(0);
 			this.robots.add(v);
 		} catch(Exception e){
 			e.printStackTrace();
@@ -296,8 +311,11 @@ public class MyGameGui
 	 **/
 	public void smartPosition ()
 	{
+
 		for(node_data v: gr.getV())
 		{
+			int av=0;
+			int bv=0;
 			for(edge_data e:gr.getE(v.getKey()))
 			{
 				for(node_fruit f:fruits)
@@ -316,7 +334,7 @@ public class MyGameGui
 
 					if(Math.abs(disN-(disSF+disDF))<this.EPS) // if the fruit is on the edge
 					{
-						int av=v.getTag();
+						av+=v.getTag()+f.getValue();
 						int ae=e.getTag();
 						if(f.getType()==1)
 						{
@@ -324,7 +342,7 @@ public class MyGameGui
 							e.setTag(++ae);
 						}
 
-						int bv=gr.getNode(e.getDest()).getTag();
+						bv+=gr.getNode(e.getDest()).getTag()+f.getValue();
 						if(f.getType()==-1)
 						{
 							gr.getNode(e.getDest()).setTag(++bv);
@@ -350,10 +368,10 @@ public class MyGameGui
 			}
 		}
 	}
-/**
- *  method for manual game.. by click on mouse
- * @throws JSONException
- */
+	/**
+	 *  method for manual game.. by click on mouse
+	 * @throws JSONException
+	 */
 	public void manual() throws JSONException {
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
@@ -372,8 +390,6 @@ public class MyGameGui
 			initFruit(f); //read json fruit and add to this.Fruits
 			//			System.out.println(f);
 		}
-
-		DR(); //defoult this.Fruits
 		this.gr=gg;
 		smartPosition (); // smart start position of robots
 		initInfoGame(infoGame); // how many robots in the game
@@ -489,17 +505,20 @@ public class MyGameGui
 		t1 = game.timeToEnd(); // update time
 		String infoGame = game.toString();
 		initInfoGame(infoGame); //update score
-		//		System.out.println("Time to end: "+t1/1000);
+		//System.out.println("Time to end: "+t1/1000);
 		Graph_Algo ga=new Graph_Algo();
 		ga.init(gr);
 		node_fruit wantedFruit=new FruitData();
+		int maxVal=-1;
 		for(node_robot rob: robots)
 		{
+
 			double minDist=Double.MAX_VALUE; // veriable to shortest distance
 			for(node_fruit f: fruits)
 			{
 				if(f.getWithRobot()==0)
 				{
+					int tmp1=f.getValue();
 					if(f.getType()==1) //apple= src to dest
 					{
 						double tmp= ga.shortestPathDist(rob.getSrc(),f.getSrc());
@@ -508,6 +527,7 @@ public class MyGameGui
 						{
 							minDist=tmp;
 							wantedFruit=f;
+							maxVal=tmp1;
 						}
 					}
 					else // banana dest to src
@@ -519,6 +539,7 @@ public class MyGameGui
 						{
 							minDist=tmp;
 							wantedFruit=f;
+							maxVal=tmp1;
 						}
 					}
 				}
@@ -549,9 +570,8 @@ public class MyGameGui
 				rob.getPath().remove(0);
 			}
 		}
-	
 
-//		game.move();
+
 		List<String> currF = game.getFruits();
 		fruits.clear();
 		for (String string : currF) 
@@ -568,6 +588,7 @@ public class MyGameGui
 		paint();
 
 	}
+
 	/**
 	 * method to send kml object the fruits on isRunning loop
 	 */
@@ -603,11 +624,12 @@ public class MyGameGui
 						}
 						try {
 							JSONObject fr=jo.getJSONObject("Fruit");
-//							double value= fr.getDouble("value");
+							//							double value= fr.getDouble("value");
 							int type = fr.getInt("type");
+							int value = fr.getInt("value");
 							String pos=fr.getString("pos");
 							Point3D p=new Point3D(pos);
-							node_fruit v=new FruitData(p, type);
+							node_fruit v=new FruitData(p, type,value);
 							v.setWithRobot(0);
 							kmlFruits.add(v);
 						} catch(Exception e){
@@ -641,10 +663,10 @@ public class MyGameGui
 					}
 					kml.setFruits(kmlFruits, now, after);
 					kml.setRobots(kmlRobots, now, after);
-	
+
 				}
 			}
-			
+
 		});
 		t.start();
 	}
@@ -653,9 +675,10 @@ public class MyGameGui
 	 * @throws JSONException
 	 * @throws InterruptedException
 	 */
-	
-	
+
+
 	public void automatic() throws JSONException, InterruptedException {
+
 		//choose senario, draw senario.
 		JFrame sen= new JFrame();
 		String i = JOptionPane.showInputDialog(sen,"Choose senario game between 0-23");
@@ -665,10 +688,10 @@ public class MyGameGui
 		gg.init(g); // add graph
 		String infoGame = game.toString();
 		System.out.println(infoGame);
-
-		 // default this.kml 
-		this.kml=new Logger_KML();
-
+		
+		//		int id=311605315;
+		//		Game_Server.login(id); // connect server
+		this.kml=new Logger_KML(); // new kml
 		this.gr=gg;
 		kml.setGraph(gr); // set graph for kml
 		kml.setName(i); // set name file kml by senario
@@ -680,12 +703,11 @@ public class MyGameGui
 			initFruit(f); //read json fruit and add to this.Fruits
 			//			System.out.println(f);
 		}
-		//		kml.setFruits(fruits);
 		DR(); //default this.robots
 
 		smartPosition (); // smart start position of robots
 		initInfoGame(infoGame); // how many robots in the game
-		int maxF=fruits.size();  
+		int maxF=fruits.size()+2000; 
 		while(maxF>0) // loop to position on the edge with the most fruits
 		{
 			for(node_data v: gr.getV())
@@ -693,11 +715,13 @@ public class MyGameGui
 				if(numRob>0&&v.getTag()==maxF)
 				{
 					game.addRobot(v.getKey());
+					v.setWeight(-4);
 					numRob--;
 				}
 			}
 			maxF--;
 		}
+
 
 		for(String r:game.getRobots()) // add robots
 		{
@@ -709,29 +733,72 @@ public class MyGameGui
 		game.startGame();
 		threadKml(game);
 		long tHelp=game.timeToEnd();
+		int space=0;
 		while(game.isRunning())
 		{
-		moveAuto(game);
-		if(Integer.parseInt(i)<10)
-		{
-			if(tHelp-game.timeToEnd()>100) // efficient formula to call move
+			moveAuto(game);
+			switch (Integer.parseInt(i)) 
 			{
-				game.move();
-				tHelp=game.timeToEnd();
-			}
-		}
-		else
-		{
-			if(tHelp-game.timeToEnd()>70) // efficient formula to call move
-			{
-				game.move();
-				tHelp=game.timeToEnd();
-			}
-		}
-	
+			case 0:
+				space =102;
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 6:
+			case 7:
+			case 8:
+				space =101;
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			case 5:
+				space =118;
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			case 9:
+			case 10:
+			case 11:
+			case 12:
+			case 13:
+			case 14:
+			case 15:
+			case 16:
+			case 17:
+			case 18:
+			case 20:
+			case 21:
+			case 22:
+				space =100;
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			case 19:
+
+
+
+				space =110;
+				if(tHelp<13000)
+				{
+					space=75;
+				}
+				System.out.println(space);
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			case 23:
+
+				space =45;
+				tHelp=timeToMove(tHelp,game,space);
+				break;
+			default:
+				break;
+			} 
+
+
 		}	
-		kml.finalText(); // close the kml text
-		kml.saveKml(); // save kml file
+		//		kml.finalText(); // close the kml text
+		//		kml.saveKml(); // save kml file
+		game.sendKML(kml.str);
 		System.out.println(game.toString());
 		infoGame = game.toString();
 		initInfoGame(infoGame);
@@ -740,5 +807,132 @@ public class MyGameGui
 		game.stopGame();
 		fruits.clear();
 		robots.clear();
+	}
+
+
+	private long timeToMove(long tHelp, game_service g, int space) {
+		if(tHelp-g.timeToEnd()>space) // efficient formula to call move
+		{
+			g.move();
+			tHelp=g.timeToEnd();
+		}
+		return tHelp;
+	}
+
+	static int gpCount=0; // how many games
+	static int level=0; // max level
+	static int myGrade []=new int [24];// best scores
+	static int moveArr [] =new int [24];// requested move
+	static Hashtable<Integer, Integer> allGrade=new Hashtable<Integer, Integer>(); // key=id, value=senario (value not used)
+	static int myPlace []= new int [24]; // 
+/**
+ * method for "Game server info" in menubar
+ * get details from printLog() method
+ * and draw them:
+ * how many games played
+ * my best score and my place by senario
+ */
+	public void gameServerInfo() {
+		StdDraw.clear();
+		int y=0; // parameter to down line
+		StdDraw.setPenColor(Color.BLACK);
+		printLog();
+		StdDraw.textLeft(minx, maxy-y, "Game played : "+gpCount);
+		y+=30;
+		StdDraw.textLeft(minx, maxy-y, "Max level: "+level);
+		y+=30;
+		String grades="";
+
+		for (int i = 0; i < myGrade.length; i++) 
+		{
+			if(myGrade[i]>0) // if releveant senario
+			{
+				grades="Game "+i+": my Best score is "+myGrade[i];
+				StdDraw.textLeft(minx,maxy-y, grades); // draw my best score
+				StdDraw.textLeft(minx+300,maxy-y, "My place is "+myPlace[i]);// draw my place
+				y+=30;
+			}
+
+		}
+		StdDraw.show();
+	}
+	/**
+	 * help method for gameServerInfo() 
+	 * get detail from server 
+	 */
+	public static void printLog() {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection connection = DriverManager.getConnection(SimpleDB.jdbcUrl, SimpleDB.jdbcUser, SimpleDB.jdbcUserPassword);
+			Statement statement = connection.createStatement();
+			String allCustomersQuery = "SELECT * FROM Logs WHERE UserID=311605315;";
+			ResultSet resultSet = statement.executeQuery(allCustomersQuery);
+			moveArr [0]=290; 
+			moveArr [1]=580; 
+			moveArr [3]=580;
+			moveArr [5]=500;
+			moveArr [9]=580;
+			moveArr [11]=580;
+			moveArr [13]=580;
+			moveArr [16]=290;
+			moveArr [19]=580;
+			moveArr [20]=290;
+			moveArr [23]=1140;
+
+			while(resultSet.next())
+			{
+				gpCount++;
+				int tempLevel=resultSet.getInt("levelID");
+				int tempMove=resultSet.getInt("moves");
+				int tempGrade=resultSet.getInt("score");
+
+				if(tempLevel>level&&tempMove<=moveArr[tempLevel])
+				{
+					level=tempLevel;
+				}
+				if(tempGrade>myGrade[tempLevel]&&tempMove<=moveArr[tempLevel])
+				{
+					myGrade[tempLevel]=tempGrade;
+				}				
+				//				System.out.println("Id: " + resultSet.getInt("UserID")+","+resultSet.getInt("levelID")+","+resultSet.getInt("moves")+","+resultSet.getDate("time")+","+resultSet.getInt("score"));
+			}
+
+
+			//for my place
+			for (int j = 0; j < myGrade.length; j++) 
+			{
+				myPlace[j]=1; // start from place 1
+				if(myGrade[j]>0 ) // if relevant senario
+				{
+					String allCustomersQuery2 = "SELECT * FROM Logs WHERE levelID= "+j+" and moves <="+moveArr[j]+" and score >"+myGrade[j]+";";
+					ResultSet resultSet2 = statement.executeQuery(allCustomersQuery2);
+					while (resultSet2.next()) 
+					{
+						int id=resultSet2.getInt("userID");
+						int idLength=Integer.toString(id).length(); // length of id 
+						if(idLength==9)// length of id should be 9
+						{
+							allGrade.put(id, j);
+//							System.out.println("user id: "+resultSet2.getInt("userID") + " is score: " + resultSet2.getInt("score")+" senario: "+j);
+						}
+					}
+				}
+				myPlace[j]+=allGrade.size(); // size of all who pass me in senario j
+//				System.out.println(myPlace[j]);
+				allGrade.clear();
+			}
+			resultSet.close();
+			statement.close();		
+			connection.close();		
+		}
+
+		catch (SQLException sqle) {
+			System.out.println("SQLException: " + sqle.getMessage());
+			System.out.println("Vendor Error: " + sqle.getErrorCode());
+		}
+		catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
 	}
 }

@@ -379,7 +379,8 @@ public class Logger_KML {
 	public void saveKml()
 	{
 		try {
-			file = new FileWriter("data/"+fileName);
+//			file = new FileWriter("data/"+fileName);
+			file = new FileWriter(fileName);
 			file.write(this.str);
 			file.close();
 		} catch (RuntimeException | IOException e) {

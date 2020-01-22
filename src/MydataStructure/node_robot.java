@@ -38,4 +38,15 @@ public interface node_robot {
 	 *  @param list of vertex
 	 */
 	public void setPath(List<node_data> p);
+	/**
+	 * Return the 1 if robot is on the way to fruit 0 if not
+	 * @return
+	 */
+	public int getOnTheWay();
+	/** 
+	 * change if robot is on the way
+	 * 
+	 * @param opw= on the way 0 or 1
+	 */
+	public void setOnTheWay(int otw);
 }

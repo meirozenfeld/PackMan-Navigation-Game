@@ -9,6 +9,7 @@ public class FruitData implements node_fruit {
 	private int dest;
 	private int withRobot;
 	private Point3D location;
+	private int value;
 
 	public FruitData () { // default stracture to fruit
 		this.dest=-1;
@@ -17,10 +18,12 @@ public class FruitData implements node_fruit {
 		this.tagF=0;
 		this.location=null;
 		this.type=0;
+		this.value=0;
 	}
-	public FruitData (Point3D p,int type) { // stracture to fruit
+	public FruitData (Point3D p,int type,int value) { // stracture to fruit
 		this.location=p;
 		this.type=type;
+		this.value=value;
 	}
 
 	@Override
@@ -70,5 +73,9 @@ public class FruitData implements node_fruit {
 	@Override
 	public void setDest(int d) {
 		this.dest=d;		
+	}
+	@Override
+	public int getValue() {
+		return this.value;
 	}
 }

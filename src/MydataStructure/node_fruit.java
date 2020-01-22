@@ -66,5 +66,13 @@ public interface node_fruit {
 	 */
 	public void setWithRobot(int t);
 	
+	
+	/** Return the value of node
+	 * 
+	 * 
+	 * @return
+	 */
+	public int getValue();
+
 }
 

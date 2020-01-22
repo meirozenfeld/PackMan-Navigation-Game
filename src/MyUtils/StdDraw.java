@@ -755,14 +755,17 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		
 //		menu.add(stopGame);
 				///
-				JMenu menu2 = new JMenu("File");
+				JMenu menu2 = new JMenu("Game options");
 				menuBar.add(menu2);
-				JMenuItem menuItem2 = new JMenuItem("save");
+				JMenuItem menuItem2 = new JMenuItem("Game server info");
 				menuItem2.addActionListener(std);
 				menu2.add(menuItem2);
-				JMenuItem menuItem4 = new JMenuItem("load");
-				menuItem4.addActionListener(std);
-				menu2.add(menuItem4);
+//				JMenuItem menuItem3 = new JMenuItem("My place");
+//				menuItem3.addActionListener(std);
+//				menu2.add(menuItem3);
+//				JMenuItem menuItem4 = new JMenuItem("load");
+//				menuItem4.addActionListener(std);
+//				menu2.add(menuItem4);
 		// JMenuItem menuItem5 = new JMenuItem("shortest Path");
 		// menuItem5.addActionListener(std);
 		// menu2.add(menuItem5);
@@ -1775,7 +1778,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
-		
+			break;
+		case "Game server info":
+			
+			GG.gameServerInfo();
 			break;
 //		case "save":
 //			graph_algorithms gSave=new Graph_Algo();

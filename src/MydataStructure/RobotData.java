@@ -9,7 +9,17 @@ public class RobotData implements node_robot {
 	private int src;
 	private Point3D location;
 	private List<node_data> path;
-	
+	private int onTheWay;
+
+
+	public RobotData() {
+		this.id=-1;
+		this.src=-1;
+		this.location=null;
+		this.path=null;
+		this.onTheWay=0;
+
+	}
 	public RobotData(int id,int src, Point3D p) {
 		this.id=id;
 		this.src=src;
@@ -38,5 +48,14 @@ public class RobotData implements node_robot {
 	@Override
 	public void setPath(List<node_data> p) {
 		this.path=p;		
+	}
+	@Override
+	public int getOnTheWay() {
+		return this.onTheWay;
+	}
+	@Override
+	public void setOnTheWay(int otw) {
+		this.onTheWay=otw;
+
 	}
 }
